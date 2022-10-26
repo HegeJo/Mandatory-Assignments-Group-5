@@ -1,0 +1,398 @@
+---
+title: "Mandatory Assignments in Econometrics"
+author: "Hege Johansen"
+format: html
+editor: visual
+---
+
+# Mandatory Assignment 1
+
+```{r setup}
+#| echo: false
+#| output: false
+
+library(tidyverse)
+library(tinytex)
+library(dplyr)
+library(ggplot2)
+library(dineq)
+library(readxl)
+library(magrittr)
+library(vtable)
+```
+
+```{r EU-data}
+#| echo: false
+#| output: false
+
+# EU data taken from: 
+  # https://ec.europa.eu/eurostat/databrowser/view/demo_r_pjanaggr3/default/table?lang=en
+  # https://ec.europa.eu/eurostat/databrowser/view/nama_10r_3gdp/default/table?lang=en
+ 
+
+eu_pop_nuts3 <- read_excel("demo_r_pjanaggr3__custom_3572346_spreadsheet.xlsx", 
+    sheet = "cleaned_pop")
+eu_gdp_nuts3 <- read_excel("nama_10r_3gdp__custom_3572365_spreadsheet.xlsx", 
+    sheet = "cleaned_gdp")
+```
+
+```{r UK-data}
+#| echo: false
+#| output: false
+
+# Uk data taken from:
+  # https://www.ons.gov.uk/economy/grossdomesticproductgdp/datasets/regionalgrossdomesticproductallnutslevelregions
+
+  uk_pop <- read_excel("regionalgrossdomesticproductgdpallitlregions.xlsx", 
+      sheet = "Table 6", skip = 1)
+  
+  uk_gdp <- read_excel("regionalgrossdomesticproductgdpallitlregions.xlsx", 
+      sheet = "Table 5", skip = 1)
+   
+  # Drop non nuts 3 regions
+   uk_gdp_nuts3 <- uk_gdp %>%
+    # Count the numbers of id characters 
+    mutate("N_car_id" = nchar(uk_gdp$`ITL code`)) %>%
+    # Keep thoes that have 5 e.g. NUTS3 Regions
+   filter(N_car_id == 5)
+   
+   uk_pop_nuts3 <- uk_pop %>%
+    # Count the numbers of id characters 
+    mutate("N_car_id" = nchar(uk_pop$`ITL code`)) %>%
+    # Keep thoes that have 5 e.g. NUTS3 Regions
+    filter(N_car_id == 5) 
+
+```
+
+```{r EU-popdata}
+#| echo: false
+#| output: false
+
+# Transformation from wide to long
+ eu_pop_nuts3 <- eu_pop_nuts3 %>% 
+   mutate_if(is.numeric,as.character, is.factor, as.character) %>% 
+   pivot_longer(
+    cols = c('2000':'2020'),
+    names_to = "Year",
+    values_to = "Population"
+  )
+ 
+  # Renaming geo column
+      eu_pop_nuts3 <- rename(eu_pop_nuts3, "Region_code" = "GEO (Codes)")
+```
+
+```{r UK-pop-data}
+#| echo: false
+#| output: false
+
+# Transformation from wide to long
+  uk_pop_nuts3 <- uk_pop_nuts3 %>% 
+   mutate_if(is.numeric,as.character, is.factor, as.character) %>% 
+   pivot_longer(
+    cols = c('2000':'2020'),
+    names_to = "Year",
+    values_to = "Population"
+    )
+  
+# Renaming a column
+   uk_pop_nuts3 <- rename(uk_pop_nuts3, "Region_code" = "ITL code")
+# Keep relevant vars
+   uk_pop_nuts3 <- uk_pop_nuts3 %>% select("Region_code", "Year","Population")    
+
+```
+
+```{r Merge of UK and EU data}
+#| echo: false
+#| output: false
+
+pop_all_nuts3 <- rbind(uk_pop_nuts3, eu_pop_nuts3)
+
+```
+
+```{r EU-gdp-data}
+#| echo: false
+#| output: false
+
+# Transforming from wide to short
+  eu_gdp_nuts3 <- eu_gdp_nuts3 %>%  
+  mutate_if(is.numeric,as.character, is.factor, as.character) %>%  
+  pivot_longer(
+    cols = c('2000':'2020'),
+    names_to = "Year",
+    values_to = "GDP")
+  
+# Renaming geo column
+      eu_gdp_nuts3 <- rename(eu_gdp_nuts3, "Region_code" = "GEO (Codes)")
+
+```
+
+```{r UK-gdp-data}
+#| echo: false
+#| output: false
+
+# Transforming from wide to short
+  uk_gdp_nuts3 <- uk_gdp_nuts3 %>% 
+  mutate_if(is.numeric,as.character, is.factor, as.character) %>%  
+  pivot_longer(
+    cols = c('2000':'2020'),
+    names_to = "Year",
+    values_to = "GDP")
+  
+# Transforming from GDP in pounds to GDP in Euro
+uk_gdp_nuts3 <- uk_gdp_nuts3 %>% 
+  mutate("GDP" = c(as.numeric(GDP) * 1.14))
+
+# Renaming geo column
+    uk_gdp_nuts3 <- rename(uk_gdp_nuts3, "Region_code" = "ITL code")
+      
+# Keep relevant vars
+    uk_gdp_nuts3 <- uk_gdp_nuts3 %>% select("Region_code", "Year", "GDP")
+
+```
+
+```{r Merge of UK- and EU-gdp-data}
+#| echo: false
+#| output: false   
+
+gdp_all_nuts3 <- rbind(uk_gdp_nuts3, eu_gdp_nuts3 )
+
+```
+
+```{r Conversion from GDP in millions to GDP in thousands}
+#| echo: false
+#| output: false
+
+gdp_all_nuts3 <- gdp_all_nuts3 %>% 
+  mutate("GDP" = as.numeric(GDP) * 1000) 
+
+```
+
+```{r Merging of gdp- and pop-tables}
+#| echo: false
+#| output: false
+
+GDPandPOP_all_nuts3 <- merge(gdp_all_nuts3, pop_all_nuts3)
+
+```
+
+```{r Removal of rows with missing values}
+#| echo: false
+#| output: false
+
+GDPandPOP_all_nuts3 <- na_if(GDPandPOP_all_nuts3, ":") %>% 
+   na.omit(GDPandPOP_all)
+
+```
+
+## Calculation of GDP per Capita
+
+The formula for calculating GDP per Capita is as follows:
+
+$y_i=GDP_i/population_i$
+
+```{r Calculation GDP per Capita-column}
+
+# Calculation of GDP per Capita for all regions
+GDPperCap_all_nuts3 <- mutate(GDPandPOP_all_nuts3, "GDP_per_capita" = as.numeric(GDPandPOP_all_nuts3$GDP) / as.numeric(GDPandPOP_all_nuts3$Population))
+```
+
+```{r column for Nuts 1 id}
+#Gen Nuts 1 id
+GDPperCap_all_nuts3 %<>%  
+  mutate(id_nuts0 = substr(GDPperCap_all_nuts3$"Region_code", 1,2))
+
+GDPperCap_all_nuts3 %<>%
+  group_by(id_nuts0, Year) %<>%
+  mutate("GDP_country" = sum(GDP))
+  
+```
+
+### GDP per Capita by country
+
+```{r}
+#| echo: false
+
+GDPperCap_all_nuts3 %>%  
+  distinct(id_nuts0, Year, .keep_all = TRUE) %>% 
+  ggplot(aes(x = Year, 
+        y = GDP_per_capita, 
+        fill = id_nuts0, 
+        color = id_nuts0,
+        group = id_nuts0)) +
+  geom_line(lwd = 0.8) +
+   labs(x = "Year", y = "GDP per capita") +
+  ggtitle("Changes in GDP per Capita by country") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+
+-### GDP per Capita - UK
+
+```{r dataframe for UK}
+#| echo: false
+#| output: false
+
+UnitedKingdom_nuts3 <- GDPperCap_all_nuts3 %>% 
+  filter(grepl("TL", id_nuts0))
+```
+
+```{r GDP per capita for UK regions}
+#| echo: false
+
+UnitedKingdom_nuts3 %>%  
+  distinct(Region_code, Year, .keep_all = TRUE) %>% 
+  ggplot(aes(x = Year, 
+        y = GDP_per_capita, 
+        fill = Region_code, 
+        color = Region_code,
+        group = Region_code)) +
+  geom_line(lwd = 0.8) +
+  labs(x = "Year", y = "GDP per capita") +
+  ggtitle("United Kingdom: GDP per capita - NUTS3") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+### GDP per Capita - Finland
+
+```{r dataframe for Finland}
+#| echo: false
+#| output: false
+
+Finland_nuts3 <- GDPperCap_all_nuts3 %>% 
+  filter(grepl("FI", id_nuts0))
+```
+
+```{r GDP per capita for Finland regions}
+#| echo: false
+
+Finland_nuts3 %>%  
+  distinct(Region_code, Year, .keep_all = TRUE) %>% 
+  ggplot(aes(x = Year, 
+        y = GDP_per_capita, 
+        fill = Region_code, 
+        color = Region_code,
+        group = Region_code)) +
+  geom_line(lwd = 0.8) +
+   labs(x = "Year", y = "GDP per capita") +
+  ggtitle("Finland: GDP per capita - NUTS3") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+### GDP per Capita - Turkey
+
+```{r dataframe for Turkey}
+#| echo: false
+#| output: false
+
+Turkey_nuts3 <- GDPperCap_all_nuts3 %>% 
+  filter(grepl("TR", id_nuts0))
+```
+
+```{r GDP per capita for Turkey regions}
+#| echo: false
+
+Turkey_nuts3 %>%  
+  distinct(Region_code, Year, .keep_all = TRUE) %>% 
+  ggplot(aes(x = Year, 
+        y = GDP_per_capita, 
+        fill = Region_code, 
+        color = Region_code,
+        group = Region_code)) +
+  geom_line(lwd = 0.8) +
+   labs(x = "Year", y = "GDP per capita") +
+  ggtitle("Turkey: GDP per capita - NUTS3") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+### GDP per Capita - Czech Republic
+
+```{r dataframe for Czech Rebublic}
+#| echo: false
+#| output: false
+
+CzechRepublic_nuts3 <- GDPperCap_all_nuts3 %>% 
+  filter(grepl("CZ", id_nuts0))
+```
+
+```{r GDP per capita for Czech Rebublic regions}
+#| echo: false
+
+CzechRepublic_nuts3 %>%  
+  distinct(Region_code, Year, .keep_all = TRUE) %>% 
+  ggplot(aes(x = Year, 
+        y = GDP_per_capita, 
+        fill = Region_code, 
+        color = Region_code,
+        group = Region_code)) +
+  geom_line(lwd = 0.8) +
+   labs(x = "Year", y = "GDP per capita") +
+  ggtitle("Czech Rebublic: GDP per capita - NUTS3") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+## Regional inequity
+
+## Calculation of the population watertight GDP Ginie coefficients for the European NUTS2 () level.
+
+$GINW_j=\frac{1}{2 \bar{y_j}} \sum_{i}^{n_j}\sum_{l}^{n_j}\frac{p_i}{P_j} \frac{p_l}{P_j} |y_i-y_l|$
+
+```{r}
+
+GDPperCap_all_nuts3$GDP_per_capita <- as.numeric(GDPperCap_all_nuts3$GDP_per_capita)
+
+GDPperCap_all_nuts3$Population <- as.numeric(GDPperCap_all_nuts3$Population)
+
+gini.wtd(GDPperCap_all_nuts3$GDP_per_capita, weights = GDPperCap_all_nuts3$Population) 
+
+
+#Nuts 2 id
+GDPperCap_all_nuts3 <-GDPperCap_all_nuts3 %>%  
+  mutate(id_nuts2 = substr(GDPperCap_all_nuts3$Region_code, 1,4))
+#Nuts 2 id
+GDPperCap_all_nuts3 <-GDPperCap_all_nuts3 %>%  
+  mutate(id_nuts0 = substr(GDPperCap_all_nuts3$Region_code ,1,2))
+
+GDPperCap_all_nuts3  %<>% 
+  group_by(id_nuts2) %>% 
+  mutate(gini_n2 = gini.wtd(GDP_per_capita, w = Population)) %>%
+  ungroup() # to remove grouping
+```
+
+### Data description
+
+```{r}
+#| echo: false
+#| output: true
+
+SummaryStat2 <- GDPperCap_all_nuts3 %>% 
+  select(gini_n2) %>%
+ st(.)
+SummaryStat2
+```
+
+### The distribution of the Ginie coefficients
+
+```{r}
+#| echo: false
+#| output: true
+hist_gini_n2 <- ggplot(
+  GDPperCap_all_nuts3,
+  mapping = aes(x = gini_n2)) +
+  geom_histogram(
+    colour = "white", 
+    fill = "green", 
+    bins = 20, 
+    alpha = 0.5)
+
+ density_gini_n2 <- ggplot(
+    data = GDPperCap_all_nuts3,
+    mapping = aes(x = gini_n2 )) +
+  geom_density(
+    alpha = 0.2, 
+    fill = "green")
+
+gridExtra::grid.arrange(
+  hist_gini_n2, 
+  density_gini_n2,
+  nrow = 2)
+```
