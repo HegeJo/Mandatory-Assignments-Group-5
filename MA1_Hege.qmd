@@ -1,7 +1,7 @@
 ---
 title: "Mandatory Assignments in Econometrics"
 author: "Hege Johansen"
-format: pdf
+format: html
 editor: visual
 ---
 
@@ -158,12 +158,12 @@ gdp_all_nuts3 <- rbind(uk_gdp_nuts3, eu_gdp_nuts3 )
 
 ```
 
-```{r Conversion from GDP in millions to GDP in thousands}
+```{r Conversion from GDP in millions to GDP in ones}
 #| echo: false
 #| output: false
 
 gdp_all_nuts3 <- gdp_all_nuts3 %>% 
-  mutate("GDP" = as.numeric(GDP) * 1000) 
+  mutate("GDP" = as.numeric(GDP) * 1000000) 
 
 ```
 
@@ -329,43 +329,67 @@ TRA21 = Agri, TRC21 = Sanliurfa, TRB21 = Van
 
 ## Regional inequity
 
-## Calculation of the population watertight GDP Ginie coefficients for the European NUTS2 () level.
+### Calculation of the population watertight GDP Ginie coefficients for the European NUTS2 () level.
 
-$$GINW_j=\frac{1}{2 \bar{y_j}} \sum_{i}^{n_j}\sum_{l}^{n_j}\frac{p_i}{P_j} \frac{p_l}{P_j} |y_i-y_l|$$\$\$
+$$GINW_j=\frac{1}{2 \bar{y_j}} \sum_{i}^{n_j}\sum_{l}^{n_j}\frac{p_i}{P_j} \frac{p_l}{P_j} |y_i-y_l|$$
 
 ```{r}
-
 GDPperCap_all_nuts3$GDP_per_capita <- as.numeric(GDPperCap_all_nuts3$GDP_per_capita)
-
 GDPperCap_all_nuts3$Population <- as.numeric(GDPperCap_all_nuts3$Population)
 
-gini.wtd(GDPperCap_all_nuts3$GDP_per_capita, weights = GDPperCap_all_nuts3$Population) 
+gini.wtd(GDPperCap_all_nuts3$GDP_per_capita, weights = GDPperCap_all_nuts3$Population)
+```
 
-
+```{r}
 #Nuts 2 id
 GDPperCap_all_nuts3 <- GDPperCap_all_nuts3 %>%  
-  mutate(id_nuts2 = substr(GDPperCap_all_nuts3$Region_code, 1,4))
+  mutate(id_nuts2 = substr(GDPperCap_all_nuts3$`Region_code`,1,4))
 #Nuts 2 id
 GDPperCap_all_nuts3 <- GDPperCap_all_nuts3 %>%  
-  mutate(id_nuts0 = substr(GDPperCap_all_nuts3$Region_code, 1,2))
+  mutate(id_nuts0 = substr(GDPperCap_all_nuts3$`Region_code`,1,2))
+```
 
+```{r}
 GDPperCap_all_nuts3  %<>% 
   group_by(id_nuts2) %>% 
-  mutate(gini_n2 = gini.wtd(GDP_per_capita, weights = Population)) %>%
+  mutate(gini_n2 = gini.wtd(GDP_per_capita, w = Population)) %>%
   ungroup() # to remove grouping
 ```
 
-### Data description
+## Gini-coefficients for NUTS2 regions - Czech Republic
 
 ```{r}
-#| echo: false
-#| output: true
 
-SummaryStat2 <- GDPperCap_all_nuts3 %>% 
-  select(gini_n2) %>%
- st(.)
-SummaryStat2
 ```
+
+## Gini-coefficients for NUTS2 regions - Finland
+
+## Gini-coefficients for NUTS2 regions - United Kingdom
+
+## Gini-coefficients for NUTS2 regions - Turkey
+
+```{r GDP per capita for Turkey regions}
+#| echo: false
+
+ Turkey_gini_nuts2 <- GDPperCap_all_nuts3 %>%  
+  distinct(Region_code, Year, .keep_all = TRUE) 
+```
+
+```{r}
+   gini_turkey <- Turkey_gini_nuts2 %>%  
+     ggplot(aes(x = Year, 
+        y = gini_n2, 
+        fill = Region_code, 
+        color = Region_code,
+        group = Region_code)) +
+  geom_line(lwd = 0.8) +
+   labs(x = "Year", y = "GDP per capita") +
+  ggtitle("Turkey: GDP per capita - NUTS3") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+   View(gini_turkey)
+```
+
+### Data description
 
 ### The distribution of the Ginie coefficients
 
@@ -393,3 +417,5 @@ gridExtra::grid.arrange(
   density_gini_n2,
   nrow = 2)
 ```
+
+# Mandatory Assignment 2
