@@ -1,7 +1,7 @@
 ---
 title: "Mandatory Assignments in Econometrics"
 author: "Hege Johansen"
-format: html
+format: pdf
 editor: visual
 ---
 
@@ -201,66 +201,44 @@ GDPperCap_all_nuts3 <- mutate(GDPandPOP_all_nuts3, "GDP_per_capita" = as.numeric
 GDPperCap_all_nuts3 %<>%  
   mutate(id_nuts0 = substr(GDPperCap_all_nuts3$"Region_code", 1,2))
 
-GDPperCap_all_nuts3 %<>%
-  group_by(id_nuts0, Year) %<>%
-  mutate("GDP_country" = sum(GDP))
+#Gen Nuts 3 id
+GDPperCap_all_nuts3 %<>%  
+  mutate(id_nuts3 = substr(GDPperCap_all_nuts3$"Region_code", 1, 5))
   
 ```
 
 ### GDP per Capita by country
 
-```{r}
-#| echo: false
-
-GDPperCap_all_nuts3 %>%  
-  distinct(id_nuts0, Year, .keep_all = TRUE) %>% 
-  ggplot(aes(x = Year, 
-        y = GDP_per_capita, 
-        fill = id_nuts0, 
-        color = id_nuts0,
-        group = id_nuts0)) +
-  geom_line(lwd = 0.8) +
-   labs(x = "Year", y = "GDP per capita") +
-  ggtitle("Changes in GDP per Capita by country") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-```
-
--### GDP per Capita - UK
-
-```{r dataframe for UK}
-#| echo: false
-#| output: false
-
-UnitedKingdom_nuts3 <- GDPperCap_all_nuts3 %>% 
-  filter(grepl("TL", id_nuts0))
-```
-
-```{r GDP per capita for UK regions}
-#| echo: false
-
-UnitedKingdom_nuts3 %>%  
-  distinct(Region_code, Year, .keep_all = TRUE) %>% 
-  ggplot(aes(x = Year, 
-        y = GDP_per_capita, 
-        fill = Region_code, 
-        color = Region_code,
-        group = Region_code)) +
-  geom_line(lwd = 0.8) +
-  labs(x = "Year", y = "GDP per capita") +
-  ggtitle("United Kingdom: GDP per capita - NUTS3") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
-```
-
-### GDP per Capita - Finland
-
-```{r dataframe for Finland}
+```{r dataframe for Finland and Turkey}
 #| echo: false
 #| output: false
 
 Finland_nuts3 <- GDPperCap_all_nuts3 %>% 
   filter(grepl("FI", id_nuts0))
+Turkey_nuts3 <- GDPperCap_all_nuts3 %>% 
+  filter(grepl("TR", id_nuts0))
+
+FI_TR_nuts3 <- rbind(Finland_nuts3, Turkey_nuts3)
 ```
+
+```{r}
+#| echo: false
+
+FI_TR_nuts3 %>%  
+  distinct(id_nuts0, Year, .keep_all = TRUE) %>%  
+
+  ggplot(aes(x = Year,
+        y = GDP_per_capita, 
+        fill = id_nuts0, 
+        color = id_nuts0,
+        group = id_nuts0)) +
+  geom_line(lwd = 0.8) +
+  labs(x = "Year", y = "GDP per capita") +
+  ggtitle("Changes in GDP per Capita by country") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+### GDP per Capita - Finland
 
 ```{r GDP per capita for Finland regions}
 #| echo: false
@@ -278,15 +256,34 @@ Finland_nuts3 %>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
-### GDP per Capita - Turkey
+#### The 3 wealthiest regions 2019
 
-```{r dataframe for Turkey}
+```{r wealthiest regions in finland 2019}
 #| echo: false
-#| output: false
 
-Turkey_nuts3 <- GDPperCap_all_nuts3 %>% 
-  filter(grepl("TR", id_nuts0))
+FI_TR_nuts3 %>%
+  filter(grepl("FI...", id_nuts3), Year == 2019) %>%
+  select(id_nuts3, GDP_per_capita) %>%
+  slice_max(GDP_per_capita, n = 3)
 ```
+
+FI1B1 = Helsinki, FI200 = Åland, FI 195 = Pohjanmaa
+
+#### The 3 least wealthiest regions in 2019
+
+```{r least wealthiest regions in finland 2019}
+#| echo: false
+
+FI_TR_nuts3 %>%
+  filter(grepl("FI...", id_nuts3), Year == 2019) %>%
+  select(id_nuts3, GDP_per_capita) %>%
+  slice_min(GDP_per_capita, n = 3)
+
+```
+
+FI1D1 = Etelä-Savo, FI1C3 = Päijät-Häme, FI1D8 = Kainuu
+
+### GDP per Capita - Turkey
 
 ```{r GDP per capita for Turkey regions}
 #| echo: false
@@ -304,37 +301,37 @@ Turkey_nuts3 %>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
-### GDP per Capita - Czech Republic
+#### The 3 wealthiest regions 2019
 
-```{r dataframe for Czech Rebublic}
-#| echo: false
-#| output: false
-
-CzechRepublic_nuts3 <- GDPperCap_all_nuts3 %>% 
-  filter(grepl("CZ", id_nuts0))
-```
-
-```{r GDP per capita for Czech Rebublic regions}
+```{r wealthiest regions in Turkey 2019}
 #| echo: false
 
-CzechRepublic_nuts3 %>%  
-  distinct(Region_code, Year, .keep_all = TRUE) %>% 
-  ggplot(aes(x = Year, 
-        y = GDP_per_capita, 
-        fill = Region_code, 
-        color = Region_code,
-        group = Region_code)) +
-  geom_line(lwd = 0.8) +
-   labs(x = "Year", y = "GDP per capita") +
-  ggtitle("Czech Rebublic: GDP per capita - NUTS3") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+FI_TR_nuts3 %>%
+  filter(grepl("TR...", id_nuts3), Year == 2019) %>%
+  select(id_nuts3, GDP_per_capita) %>%
+  slice_max(GDP_per_capita, n = 3)
 ```
+
+TR100 = Instanbul, TR421 = Kocaeli, TR510 = Ankara
+
+#### The 3 least wealthiest regions in 2019
+
+```{r Turkeys least wealthiest regions 2019}
+#| echo: false
+
+FI_TR_nuts3 %>%
+  filter(grepl("TR...", id_nuts3), Year == 2019) %>%
+  select(id_nuts3, GDP_per_capita) %>%
+  slice_min(GDP_per_capita, n = 3)
+```
+
+TRA21 = Agri, TRC21 = Sanliurfa, TRB21 = Van
 
 ## Regional inequity
 
 ## Calculation of the population watertight GDP Ginie coefficients for the European NUTS2 () level.
 
-$GINW_j=\frac{1}{2 \bar{y_j}} \sum_{i}^{n_j}\sum_{l}^{n_j}\frac{p_i}{P_j} \frac{p_l}{P_j} |y_i-y_l|$
+$$GINW_j=\frac{1}{2 \bar{y_j}} \sum_{i}^{n_j}\sum_{l}^{n_j}\frac{p_i}{P_j} \frac{p_l}{P_j} |y_i-y_l|$$\$\$
 
 ```{r}
 
@@ -346,15 +343,15 @@ gini.wtd(GDPperCap_all_nuts3$GDP_per_capita, weights = GDPperCap_all_nuts3$Popul
 
 
 #Nuts 2 id
-GDPperCap_all_nuts3 <-GDPperCap_all_nuts3 %>%  
+GDPperCap_all_nuts3 <- GDPperCap_all_nuts3 %>%  
   mutate(id_nuts2 = substr(GDPperCap_all_nuts3$Region_code, 1,4))
 #Nuts 2 id
-GDPperCap_all_nuts3 <-GDPperCap_all_nuts3 %>%  
-  mutate(id_nuts0 = substr(GDPperCap_all_nuts3$Region_code ,1,2))
+GDPperCap_all_nuts3 <- GDPperCap_all_nuts3 %>%  
+  mutate(id_nuts0 = substr(GDPperCap_all_nuts3$Region_code, 1,2))
 
 GDPperCap_all_nuts3  %<>% 
   group_by(id_nuts2) %>% 
-  mutate(gini_n2 = gini.wtd(GDP_per_capita, w = Population)) %>%
+  mutate(gini_n2 = gini.wtd(GDP_per_capita, weights = Population)) %>%
   ungroup() # to remove grouping
 ```
 
