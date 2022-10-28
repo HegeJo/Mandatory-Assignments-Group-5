@@ -363,6 +363,8 @@ GDPperCap_all_nuts3  %<>%
 
 #### Gini-cofficients by country:
 
+**Andre: Does this seem right?**
+
 ```{r Gini per country}
 GDPperCap_all_nuts3 %>%  
   distinct(id_nuts0, Year, .keep_all = TRUE) %>%  
@@ -380,7 +382,7 @@ GDPperCap_all_nuts3 %>%
 
 #### Gini-coefficients for NUTS2 regions - Czech Republic
 
-**Andre: Is this correct - same gini for all years for each region?**
+**Andre: Are the gini-coefficients supposed to be the same for each region all years? Or am I missing something?**
 
 ```{r Gini for Czech Republic, NUTS2}
 #| echo: false
@@ -429,9 +431,7 @@ grid.arrange(hist_czechgini_nuts2,
              dens_czechgini_nuts2)
 ```
 
-```{r ranking order gini Czech Rep}
-#| echo: false
-
+```{r ranking gini Czech}
 GDPperCap_all_nuts3 %>%
   filter(grepl("CZ..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
   select(id_nuts2, gini_n2) %>%
@@ -452,9 +452,10 @@ GDPperCap_all_nuts3 %>%
         color = id_nuts2,
         group = id_nuts2)) +
   geom_line(lwd = 0.8) +
-   labs(x = "Year", y = "Gini") +
+  labs(x = "Year", y = "Gini") +
   ggtitle("Finland: GINI - NUTS2") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
 ```
 
 ```{r Gini 2019 for Finland - NUTS2}
@@ -489,7 +490,7 @@ grid.arrange(hist_finlandgini_nuts2,
              nrow = 1)
 ```
 
-```{r ranking order gini Finland}
+```{r ranking gini Finland}
 GDPperCap_all_nuts3 %>%
   filter(grepl("FI..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
   select(id_nuts2, gini_n2) %>%
@@ -546,24 +547,19 @@ grid.arrange(hist_ukgini_nuts2,
              nrow = 1)
 ```
 
-```{r Top 5 gini Uk}
-#| echo: false
-
+```{r Top 5 gini UK}
 GDPperCap_all_nuts3 %>%
   filter(grepl("TL..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
   select(id_nuts2, gini_n2) %>%
   slice_min(gini_n2, n = 5)
 ```
 
-**Andre: How can I get the following results in opposite order?:**
+**Andre: How can I get the numbers in opposite order?**
 
-```{r Bottom 5 gini uk}
-#| echo: false
-
+```{r Bottom 5 gini UK}
 GDPperCap_all_nuts3 %>%
-  filter(grepl("TL..", id_nuts2), Year == 2019) %>% 
-  distinct(id_nuts2, gini_n2) %>% 
-  select(id_nuts2, gini_n2) %>% 
+  filter(grepl("TL..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
+  select(id_nuts2, gini_n2) %>%
   slice_max(gini_n2, n = 5)
 ```
 
@@ -614,25 +610,21 @@ dens_turkeygini_nuts2 <- GDPperCap_all_nuts3 %>%
 
   grid.arrange(hist_turkeygin_nuts2,
              dens_turkeygini_nuts2)
+
 ```
 
 ```{r Top 5 gini Turkey}
-#| echo: false
 GDPperCap_all_nuts3 %>%
   filter(grepl("TR..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
   select(id_nuts2, gini_n2) %>%
   slice_min(gini_n2, n = 5)
 ```
 
-**Andre: How can I get the following results in opposite order?:**
+**Andre: How can I get the numbers in opposite order?**
 
-```{r Bottom 5 gini Turk|ey}
-#| echo: false
-
+```{r Bottom 5 gini Turkey}
 GDPperCap_all_nuts3 %>%
-  filter(grepl("TL..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
+  filter(grepl("TR..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
   select(id_nuts2, gini_n2) %>%
   slice_max(gini_n2, n = 5)
 ```
-
-# Mandatory Assignment 2
