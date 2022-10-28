@@ -19,6 +19,7 @@ library(dineq)
 library(readxl)
 library(magrittr)
 library(vtable)
+library(gridExtra)
 ```
 
 ```{r EU-data}
@@ -356,37 +357,217 @@ GDPperCap_all_nuts3  %<>%
   ungroup() # to remove grouping
 ```
 
-## Gini-coefficients for NUTS2 regions - Czech Republic
+#### Gini-coefficients for NUTS2 regions - Czech Republic
 
-```{r}
-
-```
-
-## Gini-coefficients for NUTS2 regions - Finland
-
-## Gini-coefficients for NUTS2 regions - United Kingdom
-
-## Gini-coefficients for NUTS2 regions - Turkey
-
-```{r GDP per capita for Turkey regions}
+```{r Gini for Czech Republic, NUTS2}
 #| echo: false
 
- Turkey_gini_nuts2 <- GDPperCap_all_nuts3 %>%  
-  distinct(Region_code, Year, .keep_all = TRUE) 
+  GDPperCap_all_nuts3 %>%
+    filter(grepl("CZ..", id_nuts2)) %>% 
+     ggplot(aes(x = Year, 
+        y = gini_n2, 
+        fill = id_nuts2, 
+        color = id_nuts2,
+        group = id_nuts2)) +
+  geom_line(lwd = 0.8) +
+  labs(x = "Year", y = "Gini") +
+  ggtitle("Czech Republic: GINI - NUTS2") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+```{r Gini 2019 for Czech Republic - NUTS2}
+#| echo: false
+
+hist_czechgini_nuts2 <- GDPperCap_all_nuts3 %>%
+ filter(grepl("CZ..", id_nuts2), Year == 2019) %>% 
+  distinct(id_nuts2, Year, gini_n2) %>% 
+  ggplot(aes(x = gini_n2)) +
+   geom_histogram(
+    colour = "white", 
+    fill = "green", 
+    bins = 20, 
+    alpha = 0.5) +
+    labs(x = "Gini-coefficient") +
+  ggtitle("Czech Republic: Gini 2019 - NUTS2")
+
+ 
+dens_czechgini_nuts2 <- GDPperCap_all_nuts3 %>%
+  filter(grepl("CZ..", id_nuts2)) %>%  
+  distinct(id_nuts2, Year, gini_n2) %>% 
+  ggplot(
+    mapping = aes(x = gini_n2)) +
+  geom_density(
+    alpha = 0.2, 
+    fill = "green") +
+  labs(x = "Gini-coefficient") +
+  ggtitle("Czech Republic: Gini 2019 - NUTS2")
+
+grid.arrange(hist_czechgini_nuts2,
+             dens_czechgini_nuts2)
 ```
 
 ```{r}
-   gini_turkey <- Turkey_gini_nuts2 %>%  
+GDPperCap_all_nuts3 %>%
+  filter(grepl("CZ..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
+  select(id_nuts2, gini_n2) %>%
+  slice_min(gini_n2, n = 8)
+```
+
+#### Gini-coefficients for NUTS2 regions - Finland
+
+```{r Gini for Finland, NUTS2}
+#| echo: false
+
+  GDPperCap_all_nuts3 %>%
+    filter(grepl("FI..", id_nuts2)) %>% 
+    distinct(id_nuts2, Year, gini_n2) %>% 
      ggplot(aes(x = Year, 
         y = gini_n2, 
-        fill = Region_code, 
-        color = Region_code,
-        group = Region_code)) +
+        fill = id_nuts2, 
+        color = id_nuts2,
+        group = id_nuts2)) +
   geom_line(lwd = 0.8) +
-   labs(x = "Year", y = "GDP per capita") +
-  ggtitle("Turkey: GDP per capita - NUTS3") +
+   labs(x = "Year", y = "Gini") +
+  ggtitle("Finland: GINI - NUTS2") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
-   View(gini_turkey)
+```
+
+```{r Gini 2019 for Finland - NUTS2}
+#| echo: false
+
+hist_finlandgini_nuts2 <- GDPperCap_all_nuts3 %>%
+filter(grepl("FI..", id_nuts2), Year == 2019) %>% 
+distinct(id_nuts2, Year, gini_n2) %>% 
+ggplot(aes(x = gini_n2)) +
+  geom_histogram(
+    colour = "white", 
+    fill = "green", 
+    bins = 20, 
+    alpha = 0.5) +
+  labs(x = "Gini-coefficient") +
+  ggtitle("Finland: Gini 2019 - NUTS2")
+
+ 
+dens_finlandgini_nuts2 <- GDPperCap_all_nuts3 %>%
+filter(grepl("FI..", id_nuts2)) %>% 
+distinct(id_nuts2, Year, gini_n2) %>% 
+ggplot(
+    mapping = aes(x = gini_n2, )) +
+  geom_density(
+    alpha = 0.2, 
+    fill = "green") +
+  labs(x = "Gini-coefficient") +
+  ggtitle("Finland: Gini 2019 - NUTS2")
+
+grid.arrange(hist_finlandgini_nuts2,
+             dens_finlandgini_nuts2,
+             nrow = 1)
+```
+
+```{r}
+GDPperCap_all_nuts3 %>%
+  filter(grepl("FI..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
+  select(id_nuts2, gini_n2) %>%
+  slice_min(gini_n2, n = 5)
+```
+
+#### Gini-coefficients for NUTS2 regions - United Kingdom
+
+```{r Gini for United Kingdom, NUTS2}
+#| echo: false
+
+  GDPperCap_all_nuts3 %>%
+    filter(grepl("TL..", id_nuts2)) %>% 
+     ggplot(aes(x = Year, 
+        y = gini_n2, 
+        fill = id_nuts2, 
+        color = id_nuts2,
+        group = id_nuts2)) +
+  geom_line(lwd = 0.8) +
+   labs(x = "Year", y = "Gini") +
+  ggtitle("United Kindom: GINI - NUTS2") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+```{r Gini 2019 for United Kingdom - NUTS2}
+#| echo: false
+
+hist_ukgini_nuts2 <- GDPperCap_all_nuts3 %>%
+filter(grepl("TL..", id_nuts2), Year == 2019) %>%  
+distinct(id_nuts2, Year, gini_n2) %>% 
+ggplot(aes(x = gini_n2)) +
+  geom_histogram(
+    colour = "white", 
+    fill = "green", 
+    bins = 20, 
+    alpha = 0.5) +
+  labs(x = "Gini-coefficient") +
+  ggtitle("United Kingdom: Gini 2019 - NUTS2")
+
+dens_ukgini_nuts2 <- GDPperCap_all_nuts3 %>%
+  filter(grepl("TR..", id_nuts2)) %>%  
+  distinct(id_nuts2, Year, gini_n2) %>% 
+  ggplot(
+    mapping = aes(x = gini_n2)) +
+  geom_density(
+    alpha = 0.2, 
+    fill = "green") +
+  xlim(0, 0.5) +
+  labs(x = "Gini-coefficient") +
+  ggtitle("United Kingdom: Gini 2019 - NUTS2")
+
+grid.arrange(hist_ukgini_nuts2,
+             dens_ukgini_nuts2,
+             nrow = 1)
+```
+
+#### Gini-coefficients for NUTS2 regions - Turkey
+
+```{r Gini for Turkey NUTS2}
+#| echo: false
+
+  GDPperCap_all_nuts3 %>%
+    filter(grepl("TR..", id_nuts2)) %>% 
+     ggplot(aes(x = Year, 
+        y = gini_n2, 
+        fill = id_nuts2, 
+        color = id_nuts2,
+        group = id_nuts2)) +
+  geom_line(lwd = 0.8) +
+   labs(x = "Year", y = "Gini") +
+  ggtitle("Turkey: GINI - NUTS2") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+```{r Gini 2019 for Turkey - NUTS2}
+#| echo: false
+
+hist_turkeygin_nuts2 <- GDPperCap_all_nuts3 %>%
+filter(grepl("TR..", id_nuts2), Year == 2019) %>%  
+distinct(id_nuts2, Year, gini_n2) %>%   
+ggplot(aes(x = gini_n2)) +
+  geom_histogram(
+    colour = "white", 
+    fill = "green", 
+    bins = 20, 
+    alpha = 0.5) +
+    labs(x = "Gini-coefficient") +
+  ggtitle("Turkey: Gini 2019 - NUTS2")
+
+ 
+dens_turkeygini_nuts2 <- GDPperCap_all_nuts3 %>%
+  filter(grepl("TR..", id_nuts2), Year == 2019) %>%  
+  distinct(id_nuts2, Year, gini_n2) %>% 
+  ggplot(
+    mapping = aes(x = gini_n2)) +
+  geom_density(
+    alpha = 0.2, 
+    fill = "green") +
+  labs(x = "Gini-coefficient") +
+  ggtitle("Turkey: Gini 2019 - NUTS2")
+
+  grid.arrange(hist_turkeygin_nuts2,
+             dens_turkeygini_nuts2)
 ```
 
 ### Data description
