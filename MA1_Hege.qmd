@@ -286,13 +286,32 @@ FI1D1 = Etelä-Savo, FI1C3 = Päijät-Häme, FI1D8 = Kainuu
 
 ### GDP per Capita - Turkey
 
-**Andre: How can i fix the layout for the plot? it does not look very good:**
+**Hege: How can i fix the layout for the plot? it does not look very good:**
+
+***André: I think hear you might need to look at some selected regions min max group for example***
 
 ```{r GDP per capita for Turkey regions}
 #| echo: false
 
 Turkey_nuts3 %>%  
   distinct(Region_code, Year, .keep_all = TRUE) %>% 
+  ggplot(aes(x = Year, 
+        y = GDP_per_capita, 
+        fill = Region_code, 
+        color = Region_code,
+        group = Region_code)) +
+  geom_line(lwd = 0.8) +
+   labs(x = "Year", y = "GDP per capita") +
+  ggtitle("Turkey: GDP per capita - NUTS3") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+```{r GDP per capita for Turkey regions max}
+#| echo: false
+
+Turkey_nuts3 %>%  
+  distinct(Region_code, Year, .keep_all = TRUE) %>%
+  filter(id_nuts3=="TR100" | id_nuts3=="TR421" ) %>% 
   ggplot(aes(x = Year, 
         y = GDP_per_capita, 
         fill = Region_code, 
@@ -356,14 +375,16 @@ GDPperCap_all_nuts3 <- GDPperCap_all_nuts3 %>%
 
 ```{r calculation  of gini 2}
 GDPperCap_all_nuts3  %<>% 
-  group_by(id_nuts2) %>% 
+  group_by(id_nuts2, Year) %>% 
   mutate(gini_n2 = gini.wtd(GDP_per_capita, w = Population)) %>%
   ungroup() # to remove grouping
 ```
 
 #### Gini-cofficients by country:
 
-**Andre: Does this seem right?**
+**Hege: Does this seem right?**
+
+***André: What does group_by() do it tells R to do all operations that follow for a seated group if you aim is to calculate for all nuts2 regions within on year the gine you need to define the group accordingly so group_by(id_nuts2, Year)***
 
 ```{r Gini per country}
 GDPperCap_all_nuts3 %>%  
@@ -426,6 +447,8 @@ dens_czechgini_nuts2 <- GDPperCap_all_nuts3 %>%
     fill = "green") +
   labs(x = "Gini-coefficient") +
   ggtitle("Czech Republic: Gini 2019 - NUTS2")
+
+# This is a misliding title as its gini over all years
 
 grid.arrange(hist_czechgini_nuts2,
              dens_czechgini_nuts2)
@@ -551,16 +574,19 @@ grid.arrange(hist_ukgini_nuts2,
 GDPperCap_all_nuts3 %>%
   filter(grepl("TL..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
   select(id_nuts2, gini_n2) %>%
-  slice_min(gini_n2, n = 5)
+  slice_min(gini_n2, n = 5 )
 ```
 
-**Andre: How can I get the numbers in opposite order?**
+**Hege: How can I get the numbers in opposite order?**
+
+***André: I do not understand that question do you mean from min to max?***
 
 ```{r Bottom 5 gini UK}
 GDPperCap_all_nuts3 %>%
   filter(grepl("TL..", id_nuts2), Year == 2019) %>% distinct(id_nuts2, gini_n2) %>% 
   select(id_nuts2, gini_n2) %>%
-  slice_max(gini_n2, n = 5)
+  slice_max(gini_n2, n = 5) 
+
 ```
 
 #### Gini-coefficients for NUTS2 regions - Turkey
