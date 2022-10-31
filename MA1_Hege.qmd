@@ -7,6 +7,15 @@ editor: visual
 
 # Mandatory Assignment 1
 
+## Introduction
+
+In this assignment I am going to look at two measures, GDP per Capita and the watertight GDP Gini-coefficient for a group of countries.
+
+For GDP per capita I will look at the countries of Finland and Turkey, both combined and separate.
+For the watertight GDP Gini-coefficient I will take a look at Finland, Turkey, United Kingdom and Czech Republic, both combined and separate.
+
+## Data
+
 ```{r setup}
 #| echo: false
 #| output: false
@@ -214,12 +223,27 @@ GDPperCap_all_nuts3 %<>%
 #| echo: false
 #| output: false
 
-Finland_nuts3 <- GDPperCap_all_nuts3 %>% 
-  filter(grepl("FI", id_nuts0))
+Finland_nuts3 <- GDPperCap_all_nuts3 %>%  
+  filter(grepl("FI", id_nuts0)) 
+  
 Turkey_nuts3 <- GDPperCap_all_nuts3 %>% 
-  filter(grepl("TR", id_nuts0))
+  filter(grepl("TR", id_nuts0)) 
+ 
+
 
 FI_TR_nuts3 <- rbind(Finland_nuts3, Turkey_nuts3)
+```
+
+Why
+
+```{r}
+#| echo: false
+
+GDPperCap_all_nuts3 %>% 
+  filter(Year == 2019) %>% 
+  select(., 'GDP', 'Population', 'GDP_per_capita') %>% 
+  st()
+
 ```
 
 ```{r}
