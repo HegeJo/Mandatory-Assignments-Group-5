@@ -987,20 +987,65 @@ UK2010_nuts2 %>%
 #### Transport infrastructure
 
 Rail network by NUTS 2 regions (online data code: TGS00113 )
-<https://ec.europa.eu/eurostat/databrowser/view/TGS00113/default/table?lang=en&category=reg.reg_tran.reg_otran>
-https://ec.europa.eu/eurostat/databrowser/product/view/TRAN_R\_NET
+
+Source: https://ec.europa.eu/eurostat/databrowser/product/view/TRAN_R\_NET
+
+```{r transport data}
+#| output: false
+
+# Transport-data taken from: 
+# https://ec.europa.eu/eurostat/databrowser/view/TGS00113/default/table?lang=en&category=reg.reg_tran.reg_otran
+ 
+
+transport2010_nuts2 <- read_excel("tgs00113__custom_3797296_spreadsheet.xlsx", 
+    sheet = "cleaned data")
+
+```
 
 ```{r}
-
+# Transformation from wide to long
+transport2010_nuts2 <- transport2010_nuts2 %>% 
+   mutate_if(is.numeric,as.character, is.factor, as.character) %>% 
+   pivot_longer(
+    cols = c('2010'),
+    names_to = "Year",
+    values_to = "Railway_km"
+  )
+ 
+# Renaming geo column
+      transport2010_nuts2 <- rename(transport2010_nuts2,   "Region_code" = "GEO (Codes)")
 ```
 
 #### Demographics
 
 Population density by NUTS 2 region (online data code: TGS00024 )
 
-<https://ec.europa.eu/eurostat/databrowser/view/TGS00024/default/table?lang=en&category=reg.reg_dem.reg_dempoar>
+Source: https://ec.europa.eu/eurostat/databrowser/product/view/DEMO_R\_D3DENS
 
-https://ec.europa.eu/eurostat/databrowser/product/view/DEMO_R\_D3DENS
+```{r}
+#| output: false
+
+# demografic-data taken from: 
+# https://ec.europa.eu/eurostat/databrowser/view/TGS00024/default/table?lang=en&category=reg.reg_dem.reg_dempoar
+ 
+
+demographics2010_nuts2 <- read_excel("tgs00024__custom_3796354_spreadsheet.xlsx", 
+    sheet = "cleaned data")
+```
+
+```{r}
+# Transformation from wide to long
+demographics2010_nuts2 <- demographics2010_nuts2 %>% 
+   mutate_if(is.numeric,as.character, is.factor, as.character) %>% 
+   pivot_longer(
+    cols = c('2010'),
+    names_to = "Year",
+    values_to = "Population_density"
+  )
+ 
+# Renaming geo column
+      demographics2010_nuts2 <- rename(demographics2010_nuts2,   "Region_code" = "GEO (Codes)")
+```
 
 #### Education
 
@@ -1009,7 +1054,28 @@ Education indicators by NUTS 2 regions (online data code: EDUC_REGIND )
 <https://ec.europa.eu/eurostat/databrowser/view/EDUC_REGIND/default/table?lang=en&category=reg.reg_educ.reg_educ_97>
 
 ```{r}
+#| output: false
 
+# Education-data taken from: 
+# https://ec.europa.eu/eurostat/databrowser/view/EDUC_REGIND/default/table?lang=en&category=reg.reg_educ.reg_educ_97
+ 
+
+education2010_nuts2 <- read_excel("educ_regind__custom_3797513_spreadsheet.xlsx", 
+    sheet = "cleaned data")
+```
+
+```{r}
+# Transformation from wide to long
+education2010_nuts2 <- education2010_nuts2 %>% 
+   mutate_if(is.numeric,as.character, is.factor, as.character) %>% 
+   pivot_longer(
+    cols = c('2010'),
+    names_to = "Year",
+    values_to = "share_of_student/pupils"
+  )
+ 
+# Renaming geo column
+      educ_regind_custom_3797513_spreadsheet <- rename(education2010_nuts2, "Region_code" = "GEO (Codes)")
 ```
 
 Download from [Eurostat](https://ec.europa.eu/eurostat/web/regions/data/database) for you subset of countries regional (NUTS2, j ) data related to transport infrastructure, education and demographics.
