@@ -4,7 +4,7 @@ author: "Hege Johansen"
 format: html
 editor: visual
 bibliography: [Econometrics-Hege.bib]
-csl: apa-no-ampersand.csl.
+csl: apa-no-ampersand.csl
 ---
 
 # Mandatory Assignment 1
@@ -816,63 +816,3 @@ GDPperCap_all_nuts3 %>%
 ```
 
 We see that the region with the highest GINI-coefficient is Agri, Kars, Igdir, Ardahan (as one region)
-
-## Assignment 2 (Crossectional Estimates) (S.d.W. 43)
-
-Growth and inequity
-
-**Estimate the effete of regional development** $y_j$ **on regional inequality** $GINIW_j$ **for the year 2010**
-
-Economical development is the logarithm of GDP per capita, according to [@lessmann2017].
-In this case that is regional development.
-
-```{r echo=FALSE}
-
-# creating new dataframe for 2010 - nuts 2
-data2010_nuts2 <- GDPperCap_all_nuts3 %>% 
-  filter(Year == 2010) %>% 
-  select(GDP_per_capita, id_nuts2, gini_n2) %>% 
-  mutate(log_gdp_pc = log(GDP_per_capita))
-```
-
-```{r}
-
-
-# estimate for all countries
-lm_allcountries <- lm(gini_n2~log_gdp_pc, data2010_nuts2) 
-
-lm_allcountries
-```
-
-**Discuss the goodness of fit of your estimated model.**
-
-**Plot the relationship between regional development** $y_j$ **and regional inequality** $GINIW_j$ **and the fitted line corresponding to your estimate.**
-
-```{r}
-# Save coefficients
-b1_allcountries <- lm_allcountries$coefficients[1]
-b2_allcountries <- lm_allcountries$coefficients[2]
-
-data2010_nuts2 %>% 
-  ggplot() +
-  xlim(0, 15) +
-  ylim(-0.3, 0.5) +
-  geom_point(aes(x = log_gdp_pc, y = gini_n2)) +
-  geom_abline(intercept = b1_allcountries, slope = b2_allcountries, colour = "green", size = 1) +
- theme_minimal()
-```
-
-**Plot the residuals against the predicted values of your model.**
-
-**Discuss the classical assumptions OLS in light of your data and plots**
-
-Other determinants of inequity
-
--   Download from [Eurostat](https://ec.europa.eu/eurostat/web/regions/data/database) for you subset of countries regional (NUTS2, j ) data related to transport infrastructure, education and demographics.
-    Select on variable per category that you would like to explore further in there relationship to regional inequality $GINIW_j$ .
-
--   Estimate a multiple linear regression model with you new variables for 2010 and give a small interpretation of your findings.
-
--   Discuss the overall fit of your model
-
--   Discuss the inference related to your findings
