@@ -819,6 +819,21 @@ We see that the region with the highest GINI-coefficient is Agri, Kars, Igdir, A
 
 # Mandatory Assignment 2
 
+## Introduction
+
+In this assignment I will look at growth and inequality in part one, and other determinants of inequality in part two.
+
+The data used in this assignment is from 2010 for NUTS 2 regions.
+The countries I will look at are Czech republic, Finland, Turkey and UK.
+In the second part UK is excluded because of problems regarding region codes.
+
+In the first part, growth and inequality, I will estimate the effect of regional development on regional inequality for all countries, and for one single country.
+I will also discuss the goodness of fit of my estimated model, plot the relationship between regional development and regional inequality, plot the residuals against predicted values and discuss the classical assumptions OLS in light of my model.
+
+In the second part, I will estimate a multiple linear regression (MLR) model with three new variables from three different categories.
+These categories are transport infrastructure, demographics and education, and the variables are; railway in km, population density and share of students and pupils of the the entire population.
+I will also discuss the overall fit of my model and inference related to my findings.
+
 ## Growth and inequity
 
 ### **Estimate the effete of regional development** $y_j$ **on regional inequality** $GINIW_j$ **for the year 2010**
@@ -846,16 +861,15 @@ data2010_nuts2 <- data2010_nuts2 %>%
   mutate(log_GDP_pc = log(GDP_per_capita))
 ```
 
-```{r echo=FALSE}
+```{r counting of observarions, echo=FALSE }
 data2010_nuts2 %>% 
 group_by(id_nuts0) %>% count()
 ```
 
+We can see that UK has the most NUTS2 regions.
+In the coming simple regression analysis I will therefore do an estimate for all countries together, and a estimate for the UK.
+
 ```{r}
-
-Turkey2010_nuts2 <- data2010_nuts2 %>% 
-  filter(grepl("TR..", id_nuts2))
-
 UK2010_nuts2 <- data2010_nuts2 %>% 
   filter(grepl("TL..", id_nuts2))
 ```
@@ -863,36 +877,21 @@ UK2010_nuts2 <- data2010_nuts2 %>%
 ```{r}
 
 # estimate for all countries
-lm_allcountries <- lm(gini_n2~log_GDP_pc, data2010_nuts2) 
+lm.1 <- lm(gini_n2~log_GDP_pc, data2010_nuts2) 
 
-lm_allcountries
+lm.1
 
 ```
 
 ```{r}
-# estimates for the different countries
+# estimate for UK
 
-lm_Turkey <- lm(gini_n2~log_GDP_pc, Turkey2010_nuts2)
-lm_UK <- lm(gini_n2~log_GDP_pc, UK2010_nuts2)
+lm.2 <- lm(gini_n2~log_GDP_pc, UK2010_nuts2)
 ```
 
-```{r}
+```{r echo=TRUE}
 huxreg(
- list("Total" = lm_allcountries, "Turkey" = lm_Turkey, "UK" = lm_UK),
- coefs = c(x = "log_GDP_pc", const. = "(Intercept)"),
- statistics = c(N = "nobs"),
- note = "Note: {stars},
- T statistics in brackets.")
-```
-
-```{r}
-```
-
-### **Discuss the goodness of fit of your estimated model.**
-
-```{r}
-huxreg(
- list("Total" = lm_allcountries, "Turkey" = lm_Turkey, "UK" = lm_UK),
+ list("Total" = lm.1, "UK" = lm.2),
  statistics = c(N = "nobs", R2 = "r.squared"),
  coefs = c(x = "log_GDP_pc", const. = "(Intercept)"),
  note = "Note: {stars}, T statistics in brackets,
@@ -900,31 +899,31 @@ huxreg(
 
 ```
 
+The coefficient shows that if we increase the logarithmic variable with one step, life expectancy will increase with 5.082 years.
+But what does this *mean*?
+To reinterpret it in more concrete terms, we can divide the coefficient by 100, so that it is 0.05082.
+**This represents the increase in life expectancy, if we increase GDP per capita with one percent, compared to what it was previously.**
+
+### **Discuss the goodness of fit of your estimated model.**
+
 ### **Plot the relationship between regional development** $y_j$ **and regional inequality** $GINIW_j$ **and the fitted line corresponding to your estimate.**
 
 ```{r}
 # Save coefficients
-b1_allcountries <- lm_allcountries$coefficients[1]
-b2_allcountries <- lm_allcountries$coefficients[2]
+b1_allcountries <- lm.1$coefficients[1]
+b2_allcountries <- lm.2$coefficients[2]
 
-b1_Turkey <- lm_Turkey$coefficients[1]
-b2_Turkey <- lm_Turkey$coefficients[2]
-b1_UK <- lm_UK$coefficients[1]
-b2_UK <- lm_UK$coefficients[2]
+b1_UK <- lm.2$coefficients[1]
+b2_UK <- lm.1$coefficients[2]
 
 data2010_nuts2 %>% 
   ggplot() +
   geom_point(aes(x = log_GDP_pc, y = gini_n2)) +
   geom_abline(intercept = b1_allcountries, slope = b2_allcountries, colour = "green", size = 1.5) + theme_minimal() +
-  
-
-
-geom_point(aes(x = log_GDP_pc, y = gini_n2)) +
-  geom_abline(intercept = b1_Turkey, slope = b2_Turkey, colour = "orange", size = 1) +
 
   
-    geom_point(aes(x = log_GDP_pc, y = gini_n2)) +
-  geom_abline(intercept = b1_UK, slope = b2_UK, colour = "purple", size = 1) 
+  geom_point(aes(x = log_GDP_pc, y = gini_n2)) +
+  geom_abline(intercept = b1_UK, slope = b2_UK, colour = "purple",  size = 1) 
 
 
 
@@ -934,12 +933,6 @@ geom_point(aes(x = log_GDP_pc, y = gini_n2)) +
 ```{r}
 plot_total2010 <- data2010_nuts2 %>% 
 ggplot(mapping = aes(xtot = log_GDP_pc, y = gini_n2)) + 
-  geom_point() +
-  geom_smooth(formula = "y ~ x", method = "lm", se = FALSE) 
-
-
-plot_turkey2010 <- Turkey2010_nuts2 %>% 
-  ggplot(mapping = aes(x = log_GDP_pc, y = gini_n2)) + 
   geom_point() +
   geom_smooth(formula = "y ~ x", method = "lm", se = FALSE) 
 
@@ -963,7 +956,7 @@ rel_regdev_regineq
 ```{r}
 
 pred_regdev_regineq <- data2010_nuts2 %>% 
-  add_predictions(model = lm_allcountries)
+  add_predictions(model = lm.1)
 
 rel_regdev_regineq + 
   geom_point(data = pred_regdev_regineq, mapping = aes(x = log_GDP_pc , y = pred), colour = "red", size = 3)      
@@ -971,7 +964,7 @@ rel_regdev_regineq +
 
 ```{r}
 pred_regdev_regineq <- pred_regdev_regineq %>% 
-  add_residuals(lm_allcountries)
+  add_residuals(lm.1)
 
 ```
 
@@ -1125,6 +1118,7 @@ lm.6 <- lm(gini_n2 ~ log_GDP_pc + share_studentsandpupils, data = mlr2010)
 lm.7 <- lm(gini_n2 ~ log_GDP_pc + Railway_km + share_studentsandpupils, data = mlr2010)
 lm.8 <- lm(gini_n2 ~ log_GDP_pc + Population_density + share_studentsandpupils, data = mlr2010)
 lm.9 <- lm(gini_n2 ~ log_GDP_pc + Population_density + share_studentsandpupils + Railway_km, data = mlr2010)
+
 ```
 
 ```{r}
@@ -1139,3 +1133,66 @@ lm.9 <- lm(gini_n2 ~ log_GDP_pc + Population_density + share_studentsandpupils +
 ### Discuss the overall fit of your model
 
 ### Discuss the inference related to your findings
+
+The t-test is done based on a significance level of $\alpha = 0.05$ .
+We reject $H_0$ if $t > t_\text{crit}$
+
+#### Transport infrastructure: Railway_km
+
+$$
+H_0: β = 0
+$$
+
+$$
+H_a: \beta  \neq 0
+$$
+
+```{r echo=FALSE}
+lm(gini_n2 ~ Railway_km, data = mlr2010) %>% tidy() %>% kable(., digits = 4)
+```
+
+```{r}
+qt(0.95, 31) %>% round(2)
+```
+
+Since $t_\text{crit}=t_{0.95, 31}= 1.7$ \> $t_\text{stat} = - 1.52$ and therefore we fail to reject $H_0$
+
+#### Demographics: Population_density
+
+$$
+H_0: β = 0
+$$
+
+$$
+H_a: \beta  \neq 0
+$$
+
+```{r echo=FALSE}
+lm(gini_n2 ~ Population_density, data = mlr2010) %>% tidy() %>% kable(., digits = 4)
+```
+
+```{r}
+qt(0.95, 31) %>% round(2)
+```
+
+Since $t_\text{crit}=t_{0.95, 31}= 1.7$ \> $t_\text{stat} = - 0.81$ and therefore we fail to reject $H_0$
+
+#### Education: share_studentsandpupils
+
+$$ 
+H_0: β = 0
+$$
+
+$$
+H_a: \beta  \neq 0
+$$
+
+```{r echo=FALSE}
+lm(gini_n2 ~ share_studentsandpupils, data = mlr2010) %>% tidy() %>% kable(., digits = 4)
+```
+
+```{r}
+qt(0.95, 30) %>% round(2)
+```
+
+Since $t_\text{crit}=t_{0.95, 30}= 1.7$ \> $t_\text{stat} = - 0.61$ and therefore we fail to reject $H_0$
