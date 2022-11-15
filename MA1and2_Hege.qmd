@@ -902,6 +902,7 @@ huxreg(
  list("Total" = lm.1, "UK" = lm.2),
  statistics = c(N = "nobs", R2 = "r.squared"),
  coefs = c("log(GDP pc.)" = "log_GDP_pc", const. = "(Intercept)"),
+ stars = c(`*` = 0.1, `**` = 0.05, `***` = 0.01),
  note = "Note: {stars}, T statistics in brackets,
  ")
 
@@ -973,6 +974,7 @@ Rail network by NUTS 2 regions (online data code: TGS00113 )
 Source: https://ec.europa.eu/eurostat/databrowser/product/view/TRAN_R\_NET
 
 ```{r transport data}
+#| echo: false
 #| output: false
 
 # Transport-data taken from: 
@@ -982,9 +984,6 @@ Source: https://ec.europa.eu/eurostat/databrowser/product/view/TRAN_R\_NET
 transport2010_nuts2 <- read_excel("tgs00113__custom_3797296_spreadsheet.xlsx", 
     sheet = "cleaned data")
 
-```
-
-```{r}
 # Transformation from wide to long
 transport2010_nuts2 <- transport2010_nuts2 %>% 
    mutate_if(is.numeric,as.character, is.factor, as.character) %>% 
@@ -998,6 +997,7 @@ transport2010_nuts2 <- transport2010_nuts2 %>%
       transport2010_nuts2 <- rename(transport2010_nuts2,   "id_nuts2" = "GEO (Codes)")
 ```
 
+
 #### Demographics
 
 Population density by NUTS 2 region (online data code: TGS00024 )
@@ -1005,6 +1005,7 @@ Population density by NUTS 2 region (online data code: TGS00024 )
 Source: https://ec.europa.eu/eurostat/databrowser/product/view/DEMO_R\_D3DENS
 
 ```{r}
+#| echo: false
 #| output: false
 
 # demografic-data taken from: 
@@ -1013,9 +1014,7 @@ Source: https://ec.europa.eu/eurostat/databrowser/product/view/DEMO_R\_D3DENS
 
 demographics2010_nuts2 <- read_excel("tgs00024__custom_3796354_spreadsheet.xlsx", 
     sheet = "cleaned data")
-```
 
-```{r}
 # Transformation from wide to long
 demographics2010_nuts2 <- demographics2010_nuts2 %>% 
    mutate_if(is.numeric,as.character, is.factor, as.character) %>% 
@@ -1029,6 +1028,7 @@ demographics2010_nuts2 <- demographics2010_nuts2 %>%
       demographics2010_nuts2 <- rename(demographics2010_nuts2,   "id_nuts2" = "GEO (Codes)")
 ```
 
+
 #### Education
 
 Education indicators by NUTS 2 regions (online data code: EDUC_REGIND )
@@ -1036,6 +1036,7 @@ Education indicators by NUTS 2 regions (online data code: EDUC_REGIND )
 <https://ec.europa.eu/eurostat/databrowser/view/EDUC_REGIND/default/table?lang=en&category=reg.reg_educ.reg_educ_97>
 
 ```{r}
+#| echo: false
 #| output: false
 
 # Education-data taken from: 
@@ -1044,9 +1045,7 @@ Education indicators by NUTS 2 regions (online data code: EDUC_REGIND )
 
 education2010_nuts2 <- read_excel("educ_regind__custom_3797513_spreadsheet.xlsx", 
     sheet = "cleaned data")
-```
 
-```{r}
 # Transformation from wide to long
 education2010_nuts2 <- education2010_nuts2 %>% 
    mutate_if(is.numeric,as.character, is.factor, as.character) %>% 
@@ -1060,123 +1059,125 @@ education2010_nuts2 <- education2010_nuts2 %>%
 education2010_nuts2 <- rename(education2010_nuts2, "id_nuts2" = "GEO (Codes)")
 ```
 
+
 ```{r}
+#| echo: false
+#| output: false
+
 # changing new variables from character to numeric
 transport2010_nuts2 <- transport2010_nuts2 %>% 
-  mutate(Railway_km = as.numeric(Railway_km))
+  mutate(Railway_km = as.numeric(Railway_km)/1000)
 
 demographics2010_nuts2 <- demographics2010_nuts2 %>% 
-  mutate(Population_density = as.numeric(Population_density))
+  mutate(Population_density = as.numeric(Population_density)/1000)
 
 education2010_nuts2 <- education2010_nuts2 %>% 
   mutate(share_studentsandpupils = as.numeric(share_studentsandpupils))
-```
 
-```{r}
+
 #transforming from percent to decimal
 education2010_nuts2 <- education2010_nuts2 %>% 
   mutate(share_studentsandpupils = (share_studentsandpupils / 100))
-```
 
-```{r echo=FALSE}
 # removing UK from dataset
 mlr2010 <- data2010_nuts2 %>%
  filter(id_nuts0 != 'TL')
+
+# Merge data
+
+mlr2010 <- data2010_nuts2 %>% merge(transport2010_nuts2, by=c("id_nuts2","Year"))
+mlr2010 <- mlr2010 %>% merge(demographics2010_nuts2, by=c("id_nuts2","Year"))
+mlr2010 <- mlr2010 %>% merge(education2010_nuts2, by=c("id_nuts2","Year"))
+
 ```
 
-```{r}
-mlr2010 <- merge(data2010_nuts2, transport2010_nuts2)
-
-mlr2010 <- merge(mlr2010, demographics2010_nuts2)
-
-mlr2010 <- merge(mlr2010, education2010_nuts2)
-```
 
 ### Estimate a multiple linear regression model with you new variables for 2010 and give a small interpretation of your findings.
 
 ```{r}
-lm.3 <- lm(gini_n2 ~ log_GDP_pc + Railway_km, data = mlr2010)
+#| echo: false
+#| output: true
+
+lm.3 <- lm(gini_n2 ~ log_GDP_pc , data = data2010_nuts2)
 lm.4 <- lm(gini_n2 ~ log_GDP_pc + Population_density, data = mlr2010)
-lm.5 <- lm(gini_n2 ~ log_GDP_pc + Railway_km + Population_density, data = mlr2010)
+lm.5 <- lm(gini_n2 ~ log_GDP_pc + Railway_km , data = mlr2010)
 lm.6 <- lm(gini_n2 ~ log_GDP_pc + share_studentsandpupils, data = mlr2010)
-lm.7 <- lm(gini_n2 ~ log_GDP_pc + Railway_km + share_studentsandpupils, data = mlr2010)
-lm.8 <- lm(gini_n2 ~ log_GDP_pc + Population_density + share_studentsandpupils, data = mlr2010)
-lm.9 <- lm(gini_n2 ~ log_GDP_pc + Population_density + share_studentsandpupils + Railway_km, data = mlr2010)
+lm.7 <- lm(gini_n2 ~ log_GDP_pc + Population_density+ Railway_km + share_studentsandpupils, data = mlr2010)
 
-```
 
-```{r}
 #Gen Table
   huxreg(
-  list("Model 1" = lm.3, "Model 2" = lm.4, "Model 3" = lm.5,"Model 4" = lm.6,"Model 5" = lm.7, "Model 6" = lm.8, "Model 7" = lm.9),
+  list("Model 1" = lm.3, "Model 2" = lm.4, "Model 3" = lm.5,"Model 4" = lm.6,"Model 5" = lm.7),
   statistics = c(N = "nobs", R2 = "r.squared"),
   coefs = c(log_GDP_pc = "log_GDP_pc", share_studentsandpupils = "share_studentsandpupils", Railway_km = "Railway_km", Population_density  = "Population_density", const. = "(Intercept)"),
+  stars = c(`*` = 0.1, `**` = 0.05, `***` = 0.01),
   note = "Note: {stars} T statistics in brackets.")
+
 ```
+
+**Pleas talk about this table regarding inferences and model fit. You do not need to do separate t test as the standard divination and p values are documented in the table. e.g. three stars mean that a effect is significant at a 1% level etc.  
+
+
 
 ### Discuss the overall fit of your model
 
 ### Discuss the inference related to your findings
 
-The t-test is done based on a significance level of $\alpha = 0.05$ .
-We reject $H_0$ if $t > t_\text{crit}$
 
-#### Transport infrastructure: Railway_km
+# Mandatory Assignment 2
 
-$$
-H_0: β = 0
-$$
+## Country specific effect
 
-$$
-H_a: \beta  \neq 0
-$$
 
-```{r echo=FALSE}
-lm(gini_n2 ~ Railway_km, data = mlr2010) %>% tidy() %>% kable(., digits = 4)
+```{r dummy variabel}
+#| echo = FALSE
+data2010_nuts2$UK <- ifelse(data2010_nuts2$id_nuts0 == "TL", 1,0)
+
 ```
 
 ```{r}
-qt(0.95, 31) %>% round(2)
+#| echo = FALSE
+
+lm.8 = lm(gini_n2 ~ log_GDP_pc, filter(data2010_nuts2, UK==1))
+lm.9 = lm(gini_n2 ~ log_GDP_pc, filter(data2010_nuts2, UK==0))
+lm.10 = lm(gini_n2 ~ log_GDP_pc*UK , data2010_nuts2)
+
+#Gen Table
+  huxreg(
+  list("Only UK" = lm.8, "No UK" = lm.9, "Interaction" = lm.10),
+  statistics = c(N = "nobs", R2 = "r.squared"),
+   stars = c("*" = 0.1, "**" = 0.05, "***" =0.01),
+  note = "Note: {stars} T statistics in brackets."
+  )
 ```
 
-Since $t_\text{crit}=t_{0.95, 31}= 1.7$ \> $t_\text{stat} = - 1.52$ and therefore we fail to reject $H_0$
+## Alternative forms
 
-#### Demographics: Population_density
-
-$$
-H_0: β = 0
-$$
-
-$$
-H_a: \beta  \neq 0
-$$
-
-```{r echo=FALSE}
-lm(gini_n2 ~ Population_density, data = mlr2010) %>% tidy() %>% kable(., digits = 4)
-```
 
 ```{r}
-qt(0.95, 31) %>% round(2)
+#| echo = FALSE
+data2010_nuts2 %<>%
+  mutate(GDP_per_capita=GDP_per_capita/1000)
+
+lm.7 = lm(gini_n2 ~ GDP_per_capita , data2010_nuts2)
+lm.8 = lm(gini_n2 ~ GDP_per_capita+I(GDP_per_capita*GDP_per_capita) , data2010_nuts2)
+lm.10 = lm(gini_n2 ~ log_GDP_pc , data2010_nuts2)
+lm.11 = lm(gini_n2 ~ log_GDP_pc+I(log_GDP_pc*log_GDP_pc) , data2010_nuts2)
+
+
+#Gen Table
+  huxreg(
+  list("Model 1" = lm.7, "Model 2" = lm.8, "Model 3"  = lm.10,"Model 4" = lm.11),
+  statistics = c(N = "nobs", R2 = "r.squared"),
+   stars = c("*" = 0.1, "**" = 0.05, "***" =0.01),
+  note = "Note: {stars} T statistics in brackets."
+  )
+
 ```
 
-Since $t_\text{crit}=t_{0.95, 31}= 1.7$ \> $t_\text{stat} = - 0.81$ and therefore we fail to reject $H_0$
 
-#### Education: share_studentsandpupils
 
-$$ 
-H_0: β = 0
-$$
 
-$$
-H_a: \beta  \neq 0
-$$
 
-```{r echo=FALSE}
-lm(gini_n2 ~ share_studentsandpupils, data = mlr2010) %>% tidy() %>% kable(., digits = 4)
-```
 
-```{r}
-qt(0.95, 30) %>% round(2)
-```
 
-Since $t_\text{crit}=t_{0.95, 30}= 1.7$ \> $t_\text{stat} = - 0.61$ and therefore we fail to reject $H_0$
