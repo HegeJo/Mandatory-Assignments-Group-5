@@ -8,6 +8,7 @@ format:
     toc-depth: 2
   
 editor: visual
+fontsize: "12"
 bibliography: [Econometrics-Hege.bib]
 csl: apa-no-ampersand.csl
 ---
@@ -62,7 +63,6 @@ The population data for Czech Republic, Finland and Turkey is imported from the 
 #| output: false
 
 library(tidyverse)
-library(tinytex)
 library(dplyr)
 library(ggplot2)
 library(dineq)
@@ -306,11 +306,11 @@ FI_TR_nuts3 %>%
 When it comes to thetotal GDP for Turkey and Finland over the years, we can see that Finland has a much higher GDP per capita than Turkey.
 We can see that Finland has an higher decrease in GDP per capita than Turkey, when the financial crisis hit in 2008/2009.
 
-```{r summary of gdp Finland/Turkey 2019, echo=FALSE}
+```{r summary of gdp Finland and Turkey 2019, echo=FALSE}
 GDPperCap_all_nuts3 %>% 
   filter(Year == 2019, id_nuts0 == "FI" | id_nuts0 == "TR") %>% 
   select(GDP, Population, GDP_per_capita) %>% 
-  st()
+  summary()
 ```
 
 We can see that the highest GDP is 47 times higher than the lowest GDP, and the mean is 9 188 893 300 euros.
@@ -841,9 +841,9 @@ I will also discuss the overall fit of my model and inference related to my find
 
 ## Growth and inequity
 
-### **Estimate the effete of regional development** $y_j$ **on regional inequality** $GINIW_j$ **for the year 2010**
+### Estimate the effete of regional development $y_j$ on regional inequality $GINIW_j$ for the year 2010
 
-Economical development is the logarithm of GDP per capita, according to [@lessmann2017].
+Economical development is the logarithm of GDP per capita, according to .
 In this case that is regional development.
 
 ```{r}
@@ -888,16 +888,22 @@ In the coming simple regression analysis I will therefore do an estimate for all
 
 
 ```{r}
+22_MSB104_Group_5_AS_Sugestions
 #| echo: false
 #| output: true
 
+
+main
 # estimate for all countries
 lm.1 <- lm(gini_n2~log_GDP_pc, data2010_nuts2) 
 
 # estimate for UK
-
 lm.2 <- lm(gini_n2~log_GDP_pc, UK2010_nuts2)
 
+22_MSB104_Group_5_AS_Sugestions
+
+```{r echo=FALSE}
+main
 huxreg(
  list("Total" = lm.1, "UK" = lm.2),
  statistics = c(N = "nobs", R2 = "r.squared"),
@@ -908,15 +914,14 @@ huxreg(
 
 ```
 
-The coefficient shows that if we increase the logarithmic variable with one step, life expectancy will increase with 5.082 years.
-But what does this *mean*?
-To reinterpret it in more concrete terms, we can divide the coefficient by 100, so that it is 0.05082.
-**This represents the increase in life expectancy, if we increase GDP per capita with one percent, compared to what it was previously.**
+The estimated linear model for all of the countries is
 
-### **Discuss the goodness of fit of your estimated model.**
+$$y_\text{Total} = -0.351 + 0.044_\text{log_GDP_pc}$$
 
-### **Plot the relationship between regional development** $y_j$ **and regional inequality** $GINIW_j$ **and the fitted line corresponding to your estimate.**
+which means that if we increase log_GDP_pc with one step the gini-coefficient will increase with 0.044.
+More concrete: If we divide the coefficient by 100, so it is 0.0004, then a 1% increase in GDP_per capita increases the gini-coefficient by 0.0004.
 
+22_MSB104_Group_5_AS_Sugestions
 ```{r}
 #| echo: false
 #| output: true
@@ -959,9 +964,112 @@ pred_regdev_regineq %>%
   geom_point() +
   geom_hline(yintercept = 0)
 
+For UK the estimated linear model is:
+
+$$y_\text{UK} = -1.997 + 0.206_\text{log_GDP_pc}$$
+
+If we divide the coefficient $\beta_1$ with 100 we get 0.00206.
+This tells us that an increase of 1% on GPD per capita makes the gini-coefficient increase by 0.00206.
+
+In both cases we see that there are positive correlation between gini and GDP per capita.
+
+### Goodness of fit of the estimated model.
+
+To measure goodness of fit we use the coefficient of determination, \$R_2\$.
+$R_2$ is the share of the explained variation compared to the total variation and is between 0 and 1\@wooldridgeIntroductoryEconometricsModern2020 \[p.
+35\].
+
+For all of the countries combined, $R_2$ is 0.239 or 23.9%.
+This tell us that 23.9% of the variation in gini is explained by log_GDP_pc.
+
+For UK, $R_2$ is 0.639 or 63.9%.
+This tell us that 63.9% of the variation in gini is explained by log_GDP_pc.
+
+### Relationship between regional development and regional inequality
+
+```{r echo=FALSE}
+
+ relationship_total <- data2010_nuts2 %>% 
+  ggplot() +
+  geom_point(aes(x = log_GDP_pc, y = gini_n2)) +
+  geom_abline(intercept = -0.351, 
+              slope = 0.044, 
+              colour = "green", 
+              size = 1) + 
+  theme_minimal() +
+  ggtitle("Total: Relationship between regional development and regional  inequality") + 
+  xlab("log(GDP per capita)") + 
+  ylab("Gini-coefficient")
+
+relationship_total
 ```
 
-### **Discuss the classical assumptions OLS in light of your data and plots**
+```{r echo=FALSE}
+relationship_UK <- UK2010_nuts2 %>% 
+ ggplot() +
+ geom_point(aes(x = log_GDP_pc, y = gini_n2)) +
+ geom_abline(intercept = -1.997 , 
+             slope = 0.206, 
+             colour = "purple",  
+             size = 1) + 
+ theme_minimal() +
+    ggtitle("UK: Relationship between regional development and regional  inequality") + 
+  xlab("log(GDP per capita)") + 
+  ylab("Gini-coefficient")
+
+relationship_UK
+```
+
+### **Plot the residuals against the predicted values of your model.**
+
+```{r echo=FALSE}
+resi_vs_pred_all <- lm.1
+
+resi_vs_pred_all %>% 
+  ggplot(aes(x = fitted(resi_vs_pred_all), y = resid(resi_vs_pred_all))) +
+  geom_point(colour = "darkslategrey", size = 2) +
+  xlab("Predicted values") + ylab("Residuals") +
+  ggtitle("All countries: Residuals vs. preditcted values") +
+  theme_minimal()
+
+```
+
+```{r echo=FALSE}
+resi_vs_pred_UK <- lm.2
+
+resi_vs_pred_UK %>% 
+  ggplot(aes(x = fitted(resi_vs_pred_UK), y = resid(resi_vs_pred_UK))) +
+  geom_point(colour = "darkslategrey", size = 2) +
+  xlab("Predicted values") + ylab("Residuals") +
+  ggtitle("UK: Residuals vs. preditcted values") +
+  theme_minimal()
+```
+
+### **Classical assumptions OLS in light of data and plots**
+
+## Classical Assumptions OLS
+
+Just the list of assumtions, nothing written yet.
+main
+
+1.  **Linearity:** The population relationship is linear in parameters with an additive error term.
+    <br>
+
+2.  SLR: **Sample Variation:** There is variation in $X$.
+    vs. <br>
+
+    MLR: **No perfect collinearity:** No $X$ variable is a perfect linear combination of the others.
+
+3.  **Random Sampling:** We have a random sample from the population of interest.
+    <br>
+
+4.  **Exogenety:** The $X$ variable is exogenous (*i.e.,* $\mathop{\mathbb{E}}\left( u|X \right) = 0$).
+    <br>
+
+5.  **Homoskedasticity:** The error term has the same variance for each value of the independent variable (*i.e.,* $\mathop{\text{Var}}(u|X) = \sigma^2$).
+    <br>
+
+6.  **Normality:** The population error term is normally distributed with mean zero and variance $\sigma^2$ (*i.e.,* $u \sim N(0,\sigma^2)$)
 
 ## Other determinants of inequity
 
@@ -1179,5 +1287,13 @@ lm.11 = lm(gini_n2 ~ log_GDP_pc+I(log_GDP_pc*log_GDP_pc) , data2010_nuts2)
 
 
 
+ 22_MSB104_Group_5_AS_Sugestions
 
+Since $t_\text{crit}=t_{0.95, 30}= 1.7$ \> $t_\text{stat} = - 0.61$ and therefore we fail to reject $H_0$
 
+## References
+
+## Appendix 1
+
+## Appendix 2
+ main
