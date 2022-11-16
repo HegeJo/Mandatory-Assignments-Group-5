@@ -1,12 +1,7 @@
 ---
 title: "Mandatory Assignments in Econometrics"
 author: "Hege Johansen"
-format:
-  html:
-    toc: true
-    toc-location: left
-    toc-depth: 2
-  
+format: html
 editor: visual
 fontsize: "12"
 bibliography: [Econometrics-Hege.bib]
@@ -846,16 +841,12 @@ I will also discuss the overall fit of my model and inference related to my find
 Economical development is the logarithm of GDP per capita, according to .
 In this case that is regional development.
 
-```{r}
-#| echo: false
-#| output: false
-
-#Gen Data
+```{r echo=FALSE}
 
 data2010_nuts2 <- GDPperCap_all_nuts3 %>%
  group_by(id_nuts2, Year) %>%
- mutate( gdp_n2 = sum(GDP, na.rm=T),
- pop_n2 = sum(Population, na.rm=T),
+ mutate( gdp_n2 = sum(GDP, na.rm = T),
+ pop_n2 = sum(Population, na.rm = T),
 GDP_per_capita = gdp_n2/pop_n2) %>%
  ungroup() %>%
  distinct(Year, id_nuts0, id_nuts2, GDP_per_capita, gini_n2, gdp_n2, pop_n2) %>% 
@@ -866,7 +857,6 @@ data2010_nuts2 <- data2010_nuts2 %>%
 
 UK2010_nuts2 <- data2010_nuts2 %>% 
   filter(grepl("TL..", id_nuts2))
-
 ```
 
 ```{r}
@@ -876,34 +866,19 @@ UK2010_nuts2 <- data2010_nuts2 %>%
 #| tbl-cap: Number of Observations by country in 2010
 
 data2010_nuts2 %>% 
-group_by(id_nuts0) %>% count() %>% kable()%>% kable_paper(full_width = T)
-
+group_by(id_nuts0) %>% count() %>% kable() %>% kable_paper(full_width = T)
 ```
 
 We can see that UK has the most NUTS2 regions.
 In the coming simple regression analysis I will therefore do an estimate for all countries together, and a estimate for the UK.
 
-
-
-
-
 ```{r}
-22_MSB104_Group_5_AS_Sugestions
-#| echo: false
-#| output: true
-
-
-main
 # estimate for all countries
 lm.1 <- lm(gini_n2~log_GDP_pc, data2010_nuts2) 
 
 # estimate for UK
 lm.2 <- lm(gini_n2~log_GDP_pc, UK2010_nuts2)
 
-22_MSB104_Group_5_AS_Sugestions
-
-```{r echo=FALSE}
-main
 huxreg(
  list("Total" = lm.1, "UK" = lm.2),
  statistics = c(N = "nobs", R2 = "r.squared"),
@@ -911,7 +886,6 @@ huxreg(
  stars = c(`*` = 0.1, `**` = 0.05, `***` = 0.01),
  note = "Note: {stars}, T statistics in brackets,
  ")
-
 ```
 
 The estimated linear model for all of the countries is
@@ -920,49 +894,6 @@ $$y_\text{Total} = -0.351 + 0.044_\text{log_GDP_pc}$$
 
 which means that if we increase log_GDP_pc with one step the gini-coefficient will increase with 0.044.
 More concrete: If we divide the coefficient by 100, so it is 0.0004, then a 1% increase in GDP_per capita increases the gini-coefficient by 0.0004.
-
-22_MSB104_Group_5_AS_Sugestions
-```{r}
-#| echo: false
-#| output: true
-#| label: fig-2010_log_gdp_gini
-#| fig-cap: "Log(GDP pc.) vs wGini simple linear regration"
- 
-# Save coefficients
-b1_allcountries <- lm.1$coefficients[1]
-b2_allcountries <- lm.1$coefficients[2]
-
-b1_UK <- lm.2$coefficients[1]
-b2_UK <- lm.2$coefficients[2]
-
-data2010_nuts2 %>% 
-  ggplot(aes(x = log_GDP_pc, y = gini_n2)) +
-  geom_point() +
-  stat_function(color = "red", fun=function(x) b1_allcountries+b2_allcountries*x)+
-  stat_function(color = "green", fun=function(x) b1_UK+b2_UK*x)
-
-```
-
-
-
-### **Plot the residuals against the predicted values of your model.**
-
-
-
-```{r}
-#| echo: false
-#| output: true
-#| label: fig-residuals_predicted
-#| fig-cap: "residuals vs predicted values total 2010"
- 
-pred_regdev_regineq <- data2010_nuts2 %>% 
-  add_predictions(model = lm.1)
-pred_regdev_regineq <- pred_regdev_regineq %>% 
-  add_residuals(lm.1)
-pred_regdev_regineq %>% 
-  ggplot(mapping = aes(x = pred, y = resid)) +
-  geom_point() +
-  geom_hline(yintercept = 0)
 
 For UK the estimated linear model is:
 
@@ -987,89 +918,103 @@ This tell us that 63.9% of the variation in gini is explained by log_GDP_pc.
 
 ### Relationship between regional development and regional inequality
 
-```{r echo=FALSE}
+```{r warning=FALSE}
+#| echo: false
+#| output: true
+#| label: fig-2010_log_gdp_gini_total
+#| fig-cap: "Total: Log(GDP pc.) vs wGini simple linear regration"
+#| appendix = TRUE
 
- relationship_total <- data2010_nuts2 %>% 
-  ggplot() +
-  geom_point(aes(x = log_GDP_pc, y = gini_n2)) +
-  geom_abline(intercept = -0.351, 
-              slope = 0.044, 
-              colour = "green", 
-              size = 1) + 
-  theme_minimal() +
-  ggtitle("Total: Relationship between regional development and regional  inequality") + 
-  xlab("log(GDP per capita)") + 
-  ylab("Gini-coefficient")
+# Save coefficients
+b1_allcountries <- lm.1$coefficients[1]
+b2_allcountries <- lm.1$coefficients[2]
 
-relationship_total
+
+data2010_nuts2 %>% 
+  ggplot(aes(x = log_GDP_pc, y = gini_n2)) +
+  geom_point() +
+  stat_function(color = "red", fun=function(x) b1_allcountries+b2_allcountries*x)
+
+
+  
 ```
 
-```{r echo=FALSE}
-relationship_UK <- UK2010_nuts2 %>% 
- ggplot() +
- geom_point(aes(x = log_GDP_pc, y = gini_n2)) +
- geom_abline(intercept = -1.997 , 
-             slope = 0.206, 
-             colour = "purple",  
-             size = 1) + 
- theme_minimal() +
-    ggtitle("UK: Relationship between regional development and regional  inequality") + 
-  xlab("log(GDP per capita)") + 
-  ylab("Gini-coefficient")
+```{r}
+#| echo: false
+#| output: true
+#| label: fig-2010_log_gdp_gini_UK
+#| fig-cap: "UK: Log(GDP pc.) vs wGini simple linear regration"
 
-relationship_UK
+# Save coefficients
+b1_UK <- lm.2$coefficients[1]
+b2_UK <- lm.2$coefficients[2]
+
+UK2010_nuts2 %>% 
+  ggplot(aes(x = log_GDP_pc, y = gini_n2)) +
+  geom_point() +
+  stat_function(color = "green", fun = function(x) b1_UK + b2_UK*x)
 ```
 
 ### **Plot the residuals against the predicted values of your model.**
 
-```{r echo=FALSE}
-resi_vs_pred_all <- lm.1
-
-resi_vs_pred_all %>% 
-  ggplot(aes(x = fitted(resi_vs_pred_all), y = resid(resi_vs_pred_all))) +
-  geom_point(colour = "darkslategrey", size = 2) +
-  xlab("Predicted values") + ylab("Residuals") +
-  ggtitle("All countries: Residuals vs. preditcted values") +
-  theme_minimal()
+```{r}
+#| echo: false
+#| output: true
+#| label: fig-residuals_predicted_total
+#| fig-cap: "residuals vs predicted values total 2010"
+ 
+pred_regdev_regineq_total <- data2010_nuts2 %>% 
+  add_predictions(model = lm.1)
+pred_regdev_regineq_total <- pred_regdev_regineq_total %>% 
+  add_residuals(lm.1)
+pred_regdev_regineq_total %>% 
+  ggplot(mapping = aes(x = pred, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
 
 ```
 
-```{r echo=FALSE}
-resi_vs_pred_UK <- lm.2
-
-resi_vs_pred_UK %>% 
-  ggplot(aes(x = fitted(resi_vs_pred_UK), y = resid(resi_vs_pred_UK))) +
-  geom_point(colour = "darkslategrey", size = 2) +
-  xlab("Predicted values") + ylab("Residuals") +
-  ggtitle("UK: Residuals vs. preditcted values") +
-  theme_minimal()
+```{r}
+#| echo: false
+#| output: true
+#| label: fig-residuals_predicted_UK
+#| fig-cap: "residuals vs predicted values UK 2010"
+ 
+pred_regdev_regineq_UK <- UK2010_nuts2 %>% 
+  add_predictions(model = lm.2)
+pred_regdev_regineq_UK <- pred_regdev_regineq_UK %>% 
+  add_residuals(lm.2)
+pred_regdev_regineq_UK %>% 
+  ggplot(mapping = aes(x = pred, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
 ```
 
 ### **Classical assumptions OLS in light of data and plots**
 
-## Classical Assumptions OLS
+1.  **Linearity:**
 
-Just the list of assumtions, nothing written yet.
-main
+    *The population relationship is linear in parameters with an additive error term*
 
-1.  **Linearity:** The population relationship is linear in parameters with an additive error term.
-    <br>
+    The relationship between log(GDP per capita) and Gini must be linear.
+    We can see in @fig-2010_log_gdp_gini_total for all countries that Log_GDP_pc increases as gini_n2 increase.
+    If we look at UK in @fig-2010_log_gdp_gini_UK, we can see that is is the case for UK as well.
+    Both cases indicates that the relationship is linear.
 
-2.  SLR: **Sample Variation:** There is variation in $X$.
-    vs. <br>
+2.  **Sample Variation:** *There is variation in* $X$*.*
 
-    MLR: **No perfect collinearity:** No $X$ variable is a perfect linear combination of the others.
+    We can see from both @fig-2010_log_gdp_gini_total and @fig-2010_log_gdp_gini_UK that there is variation in X.
+    We can see that log_GDP_pc has observations spread across the entire x-axis.
 
-3.  **Random Sampling:** We have a random sample from the population of interest.
-    <br>
+3.  **Random Sampling:** *We have a random sample from the population of interest*
 
-4.  **Exogenety:** The $X$ variable is exogenous (*i.e.,* $\mathop{\mathbb{E}}\left( u|X \right) = 0$).
-    <br>
+    The subset of countries used in these assignments are a random sample from the population of interest (EU/Europe).
 
-5.  **Homoskedasticity:** The error term has the same variance for each value of the independent variable (*i.e.,* $\mathop{\text{Var}}(u|X) = \sigma^2$).
-    <br>
+4.  **Exogenety:** *The* $X$ *variable is exogenous (i.e.,* $\mathop{\mathbb{E}}\left( u|X \right) = 0$).
 
-6.  **Normality:** The population error term is normally distributed with mean zero and variance $\sigma^2$ (*i.e.,* $u \sim N(0,\sigma^2)$)
+5.  **Homoskedasticity:** The error term has the same variance for each value of the independent variable (*i.e.,* $\mathop{\text{Var}}(u|X) = \sigma^2$)
+
+    There are no error terms in my models, so I cant condider Exogenety and Homoskedasity.
 
 ## Other determinants of inequity
 
@@ -1081,17 +1026,14 @@ Rail network by NUTS 2 regions (online data code: TGS00113 )
 
 Source: https://ec.europa.eu/eurostat/databrowser/product/view/TRAN_R\_NET
 
-```{r transport data}
+```{r}
 #| echo: false
 #| output: false
-
 # Transport-data taken from: 
 # https://ec.europa.eu/eurostat/databrowser/view/TGS00113/default/table?lang=en&category=reg.reg_tran.reg_otran
  
-
 transport2010_nuts2 <- read_excel("tgs00113__custom_3797296_spreadsheet.xlsx", 
     sheet = "cleaned data")
-
 # Transformation from wide to long
 transport2010_nuts2 <- transport2010_nuts2 %>% 
    mutate_if(is.numeric,as.character, is.factor, as.character) %>% 
@@ -1105,6 +1047,7 @@ transport2010_nuts2 <- transport2010_nuts2 %>%
       transport2010_nuts2 <- rename(transport2010_nuts2,   "id_nuts2" = "GEO (Codes)")
 ```
 
+{r transport data}
 
 #### Demographics
 
@@ -1136,7 +1079,6 @@ demographics2010_nuts2 <- demographics2010_nuts2 %>%
       demographics2010_nuts2 <- rename(demographics2010_nuts2,   "id_nuts2" = "GEO (Codes)")
 ```
 
-
 #### Education
 
 Education indicators by NUTS 2 regions (online data code: EDUC_REGIND )
@@ -1167,7 +1109,6 @@ education2010_nuts2 <- education2010_nuts2 %>%
 education2010_nuts2 <- rename(education2010_nuts2, "id_nuts2" = "GEO (Codes)")
 ```
 
-
 ```{r}
 #| echo: false
 #| output: false
@@ -1193,12 +1134,11 @@ mlr2010 <- data2010_nuts2 %>%
 
 # Merge data
 
-mlr2010 <- data2010_nuts2 %>% merge(transport2010_nuts2, by=c("id_nuts2","Year"))
-mlr2010 <- mlr2010 %>% merge(demographics2010_nuts2, by=c("id_nuts2","Year"))
-mlr2010 <- mlr2010 %>% merge(education2010_nuts2, by=c("id_nuts2","Year"))
+mlr2010 <- data2010_nuts2 %>% merge(transport2010_nuts2, by = c("id_nuts2","Year"))
+mlr2010 <- mlr2010 %>% merge(demographics2010_nuts2, by = c("id_nuts2","Year"))
+mlr2010 <- mlr2010 %>% merge(education2010_nuts2, by = c("id_nuts2","Year"))
 
 ```
-
 
 ### Estimate a multiple linear regression model with you new variables for 2010 and give a small interpretation of your findings.
 
@@ -1223,49 +1163,45 @@ lm.7 <- lm(gini_n2 ~ log_GDP_pc + Population_density+ Railway_km + share_student
 
 ```
 
-**Pleas talk about this table regarding inferences and model fit. You do not need to do separate t test as the standard divination and p values are documented in the table. e.g. three stars mean that a effect is significant at a 1% level etc.  
-
-
+\*\*Pleas talk about this table regarding inferences and model fit.
+You do not need to do separate t test as the standard divination and p values are documented in the table.
+e.g. three stars mean that a effect is significant at a 1% level etc.
 
 ### Discuss the overall fit of your model
 
 ### Discuss the inference related to your findings
 
-
-# Mandatory Assignment 2
+# Mandatory Assignment 3
 
 ## Country specific effect
-
 
 ```{r dummy variabel}
 #| echo = FALSE
 data2010_nuts2$UK <- ifelse(data2010_nuts2$id_nuts0 == "TL", 1,0)
-
 ```
 
 ```{r}
 #| echo = FALSE
 
-lm.8 = lm(gini_n2 ~ log_GDP_pc, filter(data2010_nuts2, UK==1))
-lm.9 = lm(gini_n2 ~ log_GDP_pc, filter(data2010_nuts2, UK==0))
+lm.8 = lm(gini_n2 ~ log_GDP_pc, filter(data2010_nuts2, UK == 1))
+lm.9 = lm(gini_n2 ~ log_GDP_pc, filter(data2010_nuts2, UK == 0))
 lm.10 = lm(gini_n2 ~ log_GDP_pc*UK , data2010_nuts2)
 
 #Gen Table
   huxreg(
   list("Only UK" = lm.8, "No UK" = lm.9, "Interaction" = lm.10),
   statistics = c(N = "nobs", R2 = "r.squared"),
-   stars = c("*" = 0.1, "**" = 0.05, "***" =0.01),
+   stars = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
   note = "Note: {stars} T statistics in brackets."
   )
 ```
 
 ## Alternative forms
 
-
 ```{r}
 #| echo = FALSE
 data2010_nuts2 %<>%
-  mutate(GDP_per_capita=GDP_per_capita/1000)
+  mutate(GDP_per_capita = GDP_per_capita/1000)
 
 lm.7 = lm(gini_n2 ~ GDP_per_capita , data2010_nuts2)
 lm.8 = lm(gini_n2 ~ GDP_per_capita+I(GDP_per_capita*GDP_per_capita) , data2010_nuts2)
@@ -1277,23 +1213,15 @@ lm.11 = lm(gini_n2 ~ log_GDP_pc+I(log_GDP_pc*log_GDP_pc) , data2010_nuts2)
   huxreg(
   list("Model 1" = lm.7, "Model 2" = lm.8, "Model 3"  = lm.10,"Model 4" = lm.11),
   statistics = c(N = "nobs", R2 = "r.squared"),
-   stars = c("*" = 0.1, "**" = 0.05, "***" =0.01),
+   stars = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
   note = "Note: {stars} T statistics in brackets."
   )
-
 ```
-
-
-
-
-
- 22_MSB104_Group_5_AS_Sugestions
-
-Since $t_\text{crit}=t_{0.95, 30}= 1.7$ \> $t_\text{stat} = - 0.61$ and therefore we fail to reject $H_0$
 
 ## References
 
 ## Appendix 1
 
 ## Appendix 2
- main
+
+## Appendix 3
