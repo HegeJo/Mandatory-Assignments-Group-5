@@ -923,7 +923,6 @@ This tell us that 63.9% of the variation in gini is explained by log_GDP_pc.
 #| output: true
 #| label: fig-2010_log_gdp_gini_total
 #| fig-cap: "Total: Log(GDP pc.) vs wGini simple linear regration"
-#| appendix = TRUE
 
 # Save coefficients
 b1_allcountries <- lm.1$coefficients[1]
@@ -1020,11 +1019,20 @@ pred_regdev_regineq_UK %>%
 
 ### Data
 
+The data used in this assignment is collected from Eurostat[^9].
+The data used is from 2010 and is for NUTS2 regions.
+
+[^9]: Source: https://ec.europa.eu/eurostat/web/regions/data/database
+
 #### Transport infrastructure
 
-Rail network by NUTS 2 regions (online data code: TGS00113 )
+For this category I have selected the variable Total railway lines, which is measured in kilometers.
+The data is imported from the dataset TGS00113[^10], which is computed from the dataset TRAN_R\_NET[^11]
+.
 
-Source: https://ec.europa.eu/eurostat/databrowser/product/view/TRAN_R\_NET
+[^10]: <https://ec.europa.eu/eurostat/databrowser/view/tgs00113/default/table?lang=en>
+
+[^11]: <https://ec.europa.eu/eurostat/databrowser/view/TRAN_R_NET/default/table?lang=en>
 
 ```{r}
 #| echo: false
@@ -1146,7 +1154,7 @@ mlr2010 <- mlr2010 %>% merge(education2010_nuts2, by = c("id_nuts2","Year"))
 #| echo: false
 #| output: true
 
-lm.3 <- lm(gini_n2 ~ log_GDP_pc , data = data2010_nuts2)
+lm.3 <- lm(gini_n2 ~ log_GDP_pc , data = mlr2010)
 lm.4 <- lm(gini_n2 ~ log_GDP_pc + Population_density, data = mlr2010)
 lm.5 <- lm(gini_n2 ~ log_GDP_pc + Railway_km , data = mlr2010)
 lm.6 <- lm(gini_n2 ~ log_GDP_pc + share_studentsandpupils, data = mlr2010)
@@ -1162,6 +1170,16 @@ lm.7 <- lm(gini_n2 ~ log_GDP_pc + Population_density+ Railway_km + share_student
   note = "Note: {stars} T statistics in brackets.")
 
 ```
+
+The estimated model with all 4 variables
+
+$$
+y = -0.044 + 0.016*x_1 - 0.179*x_2 - 0.025*x_3 - 0.052*x_4 + u
+$$We see that the intercept for this model is negative.
+That is impossible because the gini coefficient can never be negative if all other variables are 0.
+
+The only variable that increase the gini-coefficient by a one percent increase is log_GDP_pc.
+The other variables decrease the gini_coefficient by an increase of one unit.
 
 \*\*Pleas talk about this table regarding inferences and model fit.
 You do not need to do separate t test as the standard divination and p values are documented in the table.
@@ -1217,6 +1235,23 @@ lm.11 = lm(gini_n2 ~ log_GDP_pc+I(log_GDP_pc*log_GDP_pc) , data2010_nuts2)
   note = "Note: {stars} T statistics in brackets."
   )
 ```
+
+-   Test if the effect of development is significantly different for different subsets of countries in your data set.
+
+-   Explore alternative functional forms (e.g. log, cubical estimates, \...) of your previous estimates on the relationship between regional development yjyj on regional inequality GINIWjGINIWj .
+    Give an argument for two forms that might fit the data better.
+
+    -   Plot the corresponding scatter plots with the fitted estimate line.
+
+    -   Report the related estimates.
+
+    -   Give a verbal interpretation of your estimate coefficients.
+
+    -   Test for heteroskedasticity in the two new and the old model.
+
+-   Discuss if we can interpret the estimates as causal.
+
+-   Suggest potential remedies for eventual problems
 
 ## References
 
