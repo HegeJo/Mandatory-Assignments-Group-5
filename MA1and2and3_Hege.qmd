@@ -25,17 +25,17 @@ The data used in this assignment is collected from Eurostat[^1] and GOV:UK[^2]
 
 [^1]: Source: https://ec.europa.eu/eurostat/web/regions/data/database
 
-[^2]: Source: [Research and statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/search/research-and-statistics)
+[^2]: Source: <https://www.gov.uk/search/research-and-statistics>
 
 ### **GDP data**
 
-The GDP data for Czech Republic, Finland and Turkey is imported from the dataset nama_10r_3gdp[^3],, and is measured in million Euros, but is converted to Euros.
+The GDP data for Czech Republic, Finland and Turkey is imported from the dataset nama_10r_3gdp[^3], and is measured in million Euros, but is converted to Euros.
 The GDP for UK is imported from GOV:UK[^4] and is measured in million pounds sterling, but is converted to Euro
 .
 
 [^3]: Souce: <https://ec.europa.eu/eurostat/databrowser/view/nama_10r_3gdp/default/table?lang=en>
 
-[^4]: \# Table 5: https://www.ons.gov.uk/economy/grossdomesticproductgdp/datasets/regionalgrossdomesticproductallnutslevelregions
+[^4]: Source: https://www.ons.gov.uk/economy/grossdomesticproductgdp/datasets/regionalgrossdomesticproductallnutslevelregions
 
 Accoding to Eurostadt[^5], Gross domestic product (GDP) at market prices is the final result of the production activity of resident producer units.
 The measure is in million euros.
@@ -836,9 +836,9 @@ I will also discuss the overall fit of my model and inference related to my find
 
 ## Growth and inequity
 
-### Estimate the effete of regional development $y_j$ on regional inequality $GINIW_j$ for the year 2010
+### Effect of regional development on regional inequality for 2010
 
-Economical development is the logarithm of GDP per capita, according to .
+Economical development is the logarithm of GDP per capita, according to [@lessmannRegionalInequalityConvergence2017].
 In this case that is regional development.
 
 ```{r echo=FALSE}
@@ -907,87 +907,13 @@ In both cases we see that there are positive correlation between gini and GDP pe
 ### Goodness of fit of the estimated model.
 
 To measure goodness of fit we use the coefficient of determination, \$R_2\$.
-$R_2$ is the share of the explained variation compared to the total variation and is between 0 and 1\@wooldridgeIntroductoryEconometricsModern2020 \[p.
-35\].
+$R_2$ is the share of the explained variation compared to the total variation and is between 0 and 1[@wooldridgeIntroductoryEconometricsModern2020, p.35].
 
 For all of the countries combined, $R_2$ is 0.239 or 23.9%.
 This tell us that 23.9% of the variation in gini is explained by log_GDP_pc.
 
 For UK, $R_2$ is 0.639 or 63.9%.
 This tell us that 63.9% of the variation in gini is explained by log_GDP_pc.
-
-### Relationship between regional development and regional inequality
-
-```{r warning=FALSE}
-#| echo: false
-#| output: true
-#| label: fig-2010_log_gdp_gini_total
-#| fig-cap: "Total: Log(GDP pc.) vs wGini simple linear regration"
-
-# Save coefficients
-b1_allcountries <- lm.1$coefficients[1]
-b2_allcountries <- lm.1$coefficients[2]
-
-
-data2010_nuts2 %>% 
-  ggplot(aes(x = log_GDP_pc, y = gini_n2)) +
-  geom_point() +
-  stat_function(color = "red", fun=function(x) b1_allcountries+b2_allcountries*x)
-
-
-  
-```
-
-```{r}
-#| echo: false
-#| output: true
-#| label: fig-2010_log_gdp_gini_UK
-#| fig-cap: "UK: Log(GDP pc.) vs wGini simple linear regration"
-
-# Save coefficients
-b1_UK <- lm.2$coefficients[1]
-b2_UK <- lm.2$coefficients[2]
-
-UK2010_nuts2 %>% 
-  ggplot(aes(x = log_GDP_pc, y = gini_n2)) +
-  geom_point() +
-  stat_function(color = "green", fun = function(x) b1_UK + b2_UK*x)
-```
-
-### **Plot the residuals against the predicted values of your model.**
-
-```{r}
-#| echo: false
-#| output: true
-#| label: fig-residuals_predicted_total
-#| fig-cap: "residuals vs predicted values total 2010"
- 
-pred_regdev_regineq_total <- data2010_nuts2 %>% 
-  add_predictions(model = lm.1)
-pred_regdev_regineq_total <- pred_regdev_regineq_total %>% 
-  add_residuals(lm.1)
-pred_regdev_regineq_total %>% 
-  ggplot(mapping = aes(x = pred, y = resid)) +
-  geom_point() +
-  geom_hline(yintercept = 0)
-
-```
-
-```{r}
-#| echo: false
-#| output: true
-#| label: fig-residuals_predicted_UK
-#| fig-cap: "residuals vs predicted values UK 2010"
- 
-pred_regdev_regineq_UK <- UK2010_nuts2 %>% 
-  add_predictions(model = lm.2)
-pred_regdev_regineq_UK <- pred_regdev_regineq_UK %>% 
-  add_residuals(lm.2)
-pred_regdev_regineq_UK %>% 
-  ggplot(mapping = aes(x = pred, y = resid)) +
-  geom_point() +
-  geom_hline(yintercept = 0)
-```
 
 ### **Classical assumptions OLS in light of data and plots**
 
@@ -1026,13 +952,13 @@ The data used is from 2010 and is for NUTS2 regions.
 
 #### Transport infrastructure
 
-For this category I have selected the variable Total railway lines, which is measured in kilometers.
+For this category I have selected the variable total railway lines (Railway_km), which is measured in kilometers.
 The data is imported from the dataset TGS00113[^10], which is computed from the dataset TRAN_R\_NET[^11]
 .
 
-[^10]: <https://ec.europa.eu/eurostat/databrowser/view/tgs00113/default/table?lang=en>
+[^10]: Source: <https://ec.europa.eu/eurostat/databrowser/view/tgs00113/default/table?lang=en>
 
-[^11]: <https://ec.europa.eu/eurostat/databrowser/view/TRAN_R_NET/default/table?lang=en>
+[^11]: Source: <https://ec.europa.eu/eurostat/databrowser/view/TRAN_R_NET/default/table?lang=en>
 
 ```{r}
 #| echo: false
@@ -1055,13 +981,15 @@ transport2010_nuts2 <- transport2010_nuts2 %>%
       transport2010_nuts2 <- rename(transport2010_nuts2,   "id_nuts2" = "GEO (Codes)")
 ```
 
-{r transport data}
-
 #### Demographics
 
-Population density by NUTS 2 region (online data code: TGS00024 )
+For this category I have selected the variable population density(Population_density), which is measured in number of population per square kilometer.
+The data is imported from the dataset TGS00024[^12], which is computed from the dataset DEMO_R\_D3DENS [^13]
+.
 
-Source: https://ec.europa.eu/eurostat/databrowser/product/view/DEMO_R\_D3DENS
+[^12]: Source: <https://ec.europa.eu/eurostat/databrowser/view/tgs00024/default/table?lang=en>
+
+[^13]: Source: <https://ec.europa.eu/eurostat/databrowser/view/DEMO_R_D3DENS/default/table?lang=en>[(europa.eu)](https://ec.europa.eu/eurostat/databrowser/view/DEMO_R_D3DENS/default/table?lang=en)
 
 ```{r}
 #| echo: false
@@ -1089,9 +1017,10 @@ demographics2010_nuts2 <- demographics2010_nuts2 %>%
 
 #### Education
 
-Education indicators by NUTS 2 regions (online data code: EDUC_REGIND )
+For this category I have selected the variable: Pupils and Students in all levels of education (ISCED 0-6) (share_studentsandpupils) , which is measured as % of total population at regional level .
+The data is imported from the dataset EDUC_REGIND[^14].
 
-<https://ec.europa.eu/eurostat/databrowser/view/EDUC_REGIND/default/table?lang=en&category=reg.reg_educ.reg_educ_97>
+[^14]: Source: <https://ec.europa.eu/eurostat/databrowser/view/educ_regind/default/table?lang=en&category=reg.reg_educ.reg_educ_97>[(europa.eu)](https://ec.europa.eu/eurostat/databrowser/view/educ_regind/default/table?lang=en&category=reg.reg_educ.reg_educ_97)
 
 ```{r}
 #| echo: false
@@ -1148,11 +1077,16 @@ mlr2010 <- mlr2010 %>% merge(education2010_nuts2, by = c("id_nuts2","Year"))
 
 ```
 
-### Estimate a multiple linear regression model with you new variables for 2010 and give a small interpretation of your findings.
+### New estimated model with 3 new variables
 
 ```{r}
 #| echo: false
 #| output: true
+#| label: tbl-multiregression_with_3_new_variables
+#| tbl-cap: Multiregression with 3 new variables
+
+#| label: tbl-obs_2010
+#| tbl-cap: Number of Observations by country in 2010
 
 lm.3 <- lm(gini_n2 ~ log_GDP_pc , data = mlr2010)
 lm.4 <- lm(gini_n2 ~ log_GDP_pc + Population_density, data = mlr2010)
@@ -1185,9 +1119,31 @@ The other variables decrease the gini_coefficient by an increase of one unit.
 You do not need to do separate t test as the standard divination and p values are documented in the table.
 e.g. three stars mean that a effect is significant at a 1% level etc.
 
-### Discuss the overall fit of your model
+### Overall fit of new model
 
-### Discuss the inference related to your findings
+As before we use \$R_2\$ to measure goodness of fit.
+The overall fit of my new model has an $R_2$ of 0.166, which means that the 4 variables explain 16.6 % of the variarion in the gini-coefficient.
+
+### Inference related to findings
+
+In @tbl-multiregression_with_3_new_variables we can see that The only model that has an significant variable (of the three new) is Model 5, and the only variable that is significant is railway_km.
+The variable is significant on a 10 % level, p \< 0.1.
+This means that railway_km has an significant effect on the gini-coefficient.
+
+The other variables in model 5 are insignificant on all levels.
+This may indicate that it could be wise to just include Railway_km (of the new variables in the new estimated linear model. The linear model will then be either
+
+$$
+gini = 0.007 + 0.006x_1 - 0.01x_2
+$$
+
+or
+
+$$
+gini = - 0.044 + 0.016x_1-0.025x_2
+$$
+
+where $x_1$ is log_GDP_pc and $x_2$ is Railway_km.
 
 # Mandatory Assignment 3
 
@@ -1259,4 +1215,77 @@ lm.11 = lm(gini_n2 ~ log_GDP_pc+I(log_GDP_pc*log_GDP_pc) , data2010_nuts2)
 
 ## Appendix 2
 
-## Appendix 3
+### Relationship between regional development and regional inequality
+
+```{r warning=FALSE}
+#| echo: false
+#| output: true
+#| label: fig-2010_log_gdp_gini_total
+#| fig-cap: "Total: Log(GDP pc.) vs wGini simple linear regration"
+
+# Save coefficients
+b1_allcountries <- lm.1$coefficients[1]
+b2_allcountries <- lm.1$coefficients[2]
+
+
+data2010_nuts2 %>% 
+  ggplot(aes(x = log_GDP_pc, y = gini_n2)) +
+  geom_point() +
+  stat_function(color = "red", fun=function(x) b1_allcountries+b2_allcountries*x)
+
+
+  
+```
+
+```{r}
+#| echo: false
+#| output: true
+#| label: fig-2010_log_gdp_gini_UK
+#| fig-cap: "UK: Log(GDP pc.) vs wGini simple linear regration"
+
+# Save coefficients
+b1_UK <- lm.2$coefficients[1]
+b2_UK <- lm.2$coefficients[2]
+
+UK2010_nuts2 %>% 
+  ggplot(aes(x = log_GDP_pc, y = gini_n2)) +
+  geom_point() +
+  stat_function(color = "green", fun = function(x) b1_UK + b2_UK*x)
+```
+
+### Residuals against predicted values
+
+```{r}
+#| echo: false
+#| output: true
+#| label: fig-residuals_predicted_total
+#| fig-cap: "residuals vs predicted values total 2010"
+ 
+pred_regdev_regineq_total <- data2010_nuts2 %>% 
+  add_predictions(model = lm.1)
+pred_regdev_regineq_total <- pred_regdev_regineq_total %>% 
+  add_residuals(lm.1)
+pred_regdev_regineq_total %>% 
+  ggplot(mapping = aes(x = pred, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+
+```
+
+```{r}
+#| echo: false
+#| output: true
+#| label: fig-residuals_predicted_UK
+#| fig-cap: "residuals vs predicted values UK 2010"
+ 
+pred_regdev_regineq_UK <- UK2010_nuts2 %>% 
+  add_predictions(model = lm.2)
+pred_regdev_regineq_UK <- pred_regdev_regineq_UK %>% 
+  add_residuals(lm.2)
+pred_regdev_regineq_UK %>% 
+  ggplot(mapping = aes(x = pred, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+```
+
+## 
