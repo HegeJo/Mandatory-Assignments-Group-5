@@ -1124,6 +1124,9 @@ e.g. three stars mean that a effect is significant at a 1% level etc.
 As before we use \$R_2\$ to measure goodness of fit.
 The overall fit of my new model has an $R_2$ of 0.166, which means that the 4 variables explain 16.6 % of the variarion in the gini-coefficient.
 
+We can see that the variable (of the new ones) that add most explanation to $R_2$ is Railway_km and least explanation is added by share_studentsand pupils.
+If we include log_GDP_pc, this is the variable that adds least explanation to $R_2$
+
 ### Inference related to findings
 
 In @tbl-multiregression_with_3_new_variables we can see that The only model that has an significant variable (of the three new) is Model 5, and the only variable that is significant is railway_km.
@@ -1146,6 +1149,8 @@ $$
 where $x_1$ is log_GDP_pc and $x_2$ is Railway_km.
 
 # Mandatory Assignment 3
+
+I have not been able to complete this assignment, due to migraine over many days.
 
 ## Country specific effect
 
