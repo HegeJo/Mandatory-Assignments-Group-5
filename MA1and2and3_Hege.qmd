@@ -1180,10 +1180,8 @@ lm.10 = lm(gini_n2 ~ log_GDP_pc*UK , data2010_nuts2)
 
 ## Alternative forms
 
-[Cubic Functions in Econometrics Are Good for Inflexion - dummies](https://www.dummies.com/article/business-careers-money/business/economics/cubic-functions-in-econometrics-are-good-for-inflexion-156413/)
-
 Explore alternative functional forms (e.g. log, cubical estimates, \...) of your previous estimates on the relationship between regional development yjyj on regional inequality GINIWjGINIWj .
-Give an argument for two forms that might fit the data better.
+Give an argument for two forms that might fit the data better
 
 ```{r}
 #| echo = FALSE
