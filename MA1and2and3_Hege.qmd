@@ -67,6 +67,7 @@ library(vtable)
 library(gridExtra)
 library(huxtable)
 library(modelr)
+library(plm)
 ```
 
 ```{r EU-data, echo=FALSE}
@@ -1154,6 +1155,8 @@ I have not been able to complete this assignment, due to migraine over many days
 
 ## Country specific effect
 
+Test if the effect of development is significantly different for different subsets of countries in your data set.
+
 ```{r dummy variabel}
 #| echo = FALSE
 data2010_nuts2$UK <- ifelse(data2010_nuts2$id_nuts0 == "TL", 1,0)
@@ -1177,6 +1180,11 @@ lm.10 = lm(gini_n2 ~ log_GDP_pc*UK , data2010_nuts2)
 
 ## Alternative forms
 
+[Cubic Functions in Econometrics Are Good for Inflexion - dummies](https://www.dummies.com/article/business-careers-money/business/economics/cubic-functions-in-econometrics-are-good-for-inflexion-156413/)
+
+Explore alternative functional forms (e.g. log, cubical estimates, \...) of your previous estimates on the relationship between regional development yjyj on regional inequality GINIWjGINIWj .
+Give an argument for two forms that might fit the data better.
+
 ```{r}
 #| echo = FALSE
 data2010_nuts2 %<>%
@@ -1194,25 +1202,62 @@ lm.11 = lm(gini_n2 ~ log_GDP_pc+I(log_GDP_pc*log_GDP_pc) , data2010_nuts2)
   statistics = c(N = "nobs", R2 = "r.squared"),
    stars = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
   note = "Note: {stars} T statistics in brackets."
-  )
+  
 ```
 
--   Test if the effect of development is significantly different for different subsets of countries in your data set.
+-   Plot the corresponding scatter plots with the fitted estimate line.
 
--   Explore alternative functional forms (e.g. log, cubical estimates, \...) of your previous estimates on the relationship between regional development yjyj on regional inequality GINIWjGINIWj .
-    Give an argument for two forms that might fit the data better.
+    ```{r}
+    #scatterplot for cubic function
+    data2010_nuts2 %>% 
+      ggplot(mapping = aes(x = GDP_per_capita, y = gini_n2)) +
+      geom_point() +
+      geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE)
 
-    -   Plot the corresponding scatter plots with the fitted estimate line.
 
-    -   Report the related estimates.
+    ```
 
-    -   Give a verbal interpretation of your estimate coefficients.
+    ```{r}
+    #scatterplot for log_function
+    data2010_nuts2 %>% 
+      ggplot(mapping = aes(x = log_GDP_pc, y = gini_n2)) +
+      geom_point() +
+      geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE)
+    ```
 
-    -   Test for heteroskedasticity in the two new and the old model.
+-   Report the related estimates.
+
+-   Give a verbal interpretation of your estimate coefficients.
+
+-   Test for heteroskedasticity in the two new and the old model.
 
 -   Discuss if we can interpret the estimates as causal.
 
 -   Suggest potential remedies for eventual problems
+
+# Mandatory Assignment 4
+
+-   Penal Estimates
+
+    -   Use your entire data set to estimate the effect of regional development yjyj on regional inequality GINIWjGINIWj in a penal setup.
+        Present estimates that contain the following fixed effects separately and jointly:
+
+        -   country fixed effects,
+
+        -   year fixed effects
+
+        -   NUTS 2 fixed effects
+
+(Please ignore for this assignment the alternative determinants from assignment 2)
+
+-   Clean up
+
+    -   Use the feedback you obtained for Assignment one to three to improve and shorten your previous assignments.
+
+    -   Write a consistent document that discusses the hypothesis that we can observe a significant and positive effect of development on regional inequality for your set of countries.
+
+    -   Your final submission must have less than 10.000 words, three tables and five figures.
+        Appendix and references not included.
 
 ## References
 
