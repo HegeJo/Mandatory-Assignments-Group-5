@@ -1199,7 +1199,7 @@ lm.11 = lm(gini_n2 ~ log_GDP_pc+I(log_GDP_pc*log_GDP_pc) , data2010_nuts2)
   list("Model 1" = lm.7, "Model 2" = lm.8, "Model 3"  = lm.10,"Model 4" = lm.11),
   statistics = c(N = "nobs", R2 = "r.squared"),
    stars = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
-  note = "Note: {stars} T statistics in brackets."
+  note = "Note: {stars} T statistics in brackets.")
   
 ```
 
@@ -1223,15 +1223,27 @@ lm.11 = lm(gini_n2 ~ log_GDP_pc+I(log_GDP_pc*log_GDP_pc) , data2010_nuts2)
       geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE)
     ```
 
--   Report the related estimates.
+**Report the related estimates**
 
--   Give a verbal interpretation of your estimate coefficients.
+The estimated cubic function is:
 
--   Test for heteroskedasticity in the two new and the old model.
+$$
+gini = 0.037 + 0.002*x_1 + 0.000*x^2
+$$
 
--   Discuss if we can interpret the estimates as causal.
+The estimated log_function is:
 
--   Suggest potential remedies for eventual problems
+$$
+gini = 4.781 - 1.038*x_1 + 0.057*x^2
+$$
+
+**Give a verbal interpretation of your estimate coefficients**
+
+**Test for heteroskedasticity in the two new and the old model.**
+
+**Discuss if we can interpret the estimates as causal**
+
+**Suggest potential remedies for eventual problems**
 
 # Mandatory Assignment 4
 
