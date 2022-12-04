@@ -1177,6 +1177,8 @@ lm.10 = lm(gini_n2 ~ log_GDP_pc*UK , data2010_nuts2)
 
 ## Alternative forms
 
+[Cubic Functions in Econometrics Are Good for Inflexion - dummies](https://www.dummies.com/article/business-careers-money/business/economics/cubic-functions-in-econometrics-are-good-for-inflexion-156413/)
+
 ```{r}
 #| echo = FALSE
 data2010_nuts2 %<>%
